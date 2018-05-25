@@ -1,2 +1,2 @@
-# GANs-n-reels
+# GANs and Reels
 Repository for Research
