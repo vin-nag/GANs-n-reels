@@ -1,0 +1,56 @@
+
+2018-06-01 14:58:14.732609
+
+A total of 16163 tunes were scanned.
+Max unique tune id is: 16988
+
+4 different types of SONG STYLES were found.
+reel           - 11445 / 16163 -->    70.81%
+hornpipe       - 2236  / 16163 -->    13.83%
+barndance      - 1550  / 16163 -->     9.59%
+strathspey     - 928   / 16163 -->     5.74%
+
+
+1 different types of TIME SIGNATURES were found.
+4/4            - 16162 / 16163 -->    99.99%
+
+
+23 different types of KEY SIGNATURES were found.
+Bdorian        - 56    / 16163 -->     0.35%
+Gdorian        - 155   / 16163 -->     0.96%
+Aminor         - 448   / 16163 -->     2.77%
+Emajor         - 96    / 16163 -->     0.59%
+Eminor         - 759   / 16163 -->     4.70%
+Emixolydian    - 23    / 16163 -->     0.14%
+Fmajor         - 284   / 16163 -->     1.76%
+Adorian        - 1034  / 16163 -->     6.40%
+Dmixolydian    - 415   / 16163 -->     2.57%
+Cdorian        - 42    / 16163 -->     0.26%
+Gminor         - 230   / 16163 -->     1.42%
+Amixolydian    - 601   / 16163 -->     3.72%
+Ddorian        - 193   / 16163 -->     1.19%
+Gmajor         - 4252  / 16163 -->    26.31%
+Fdorian        - 28    / 16163 -->     0.17%
+Dminor         - 204   / 16163 -->     1.26%
+Bminor         - 525   / 16163 -->     3.25%
+Edorian        - 812   / 16163 -->     5.02%
+Cmajor         - 406   / 16163 -->     2.51%
+Gmixolydian    - 68    / 16163 -->     0.42%
+Bmixolydian    - 9     / 16163 -->     0.06%
+Amajor         - 1178  / 16163 -->     7.29%
+Dmajor         - 4322  / 16163 -->    26.74%
+
+
+4 different types of MODE TYPES were found.
+minor          - ['A', 'E', 'G', 'D', 'B']
+major          - ['E', 'F', 'G', 'C', 'A', 'D']
+mixolydian     - ['E', 'D', 'A', 'G', 'B']
+dorian         - ['B', 'G', 'A', 'C', 'D', 'F', 'E']
+
+
+minor          - 2166  / 16163 -->    13.40%
+major          - 10538 / 16163 -->    65.20%
+mixolydian     - 1116  / 16163 -->     6.90%
+dorian         - 2320  / 16163 -->    14.35%
+
+
