@@ -110,34 +110,37 @@ def remove_dual_repeat(abc, tune_id):
 
         if good_str:
             if len(temp) >= 2:
-                for x in range(count1):
-                    loc1 = abc.index('|1') + 1
-                    loc2 = abc.index(':|2') + 2
-                    bars = 0
-                    fin = loc2
-                    while loc1 < loc2:
-                        loc1 += 1
-                        if abc[loc1] != '|':
-                            continue
-                        else:
-                            while abc[loc1] == '|':
-                                loc1 += 1
-                            bars += 1
+                try:
+                    for x in range(count1):
+                        loc1 = abc.index('|1') + 1
+                        loc2 = abc.index(':|2') + 2
+                        bars = 0
+                        fin = loc2
+                        while loc1 < loc2:
+                            loc1 += 1
+                            if abc[loc1] != '|':
+                                continue
+                            else:
+                                while abc[loc1] == '|':
+                                    loc1 += 1
+                                bars += 1
 
-                    while bars > 0:
-                        fin += 1
-                        if fin >= len(abc): break
-                        if abc[fin] != '|':
-                            continue
-                        else:
-                            while abc[fin] == '|':
-                                fin += 1
-                                if fin >= len(abc): break
-                            bars -= 1
-                    fin -= 1
-                    sub = abc[:fin]
-                    abc = abc[fin:]
-                    cleaned += remove_single_dual_repeat(sub, tune_id)
+                        while bars > 0:
+                            fin += 1
+                            if fin >= len(abc): break
+                            if abc[fin] != '|':
+                                continue
+                            else:
+                                while abc[fin] == '|':
+                                    fin += 1
+                                    if fin >= len(abc): break
+                                bars -= 1
+                        fin -= 1
+                        sub = abc[:fin]
+                        abc = abc[fin:]
+                        cleaned += remove_single_dual_repeat(sub, tune_id)
+                except ValueError:
+                    return '!!BAD ABC!!'
 
             elif len(temp) == 1:
                 cleaned = remove_single_dual_repeat(abc, tune_id)
