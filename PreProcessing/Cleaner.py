@@ -1,4 +1,11 @@
+# region CLEAN CHARACTERS
+
+
 def remove_whitespace(abc):
+    """
+    Takes an abc string, and strips white space,
+    as well as consolidating similar grammar
+    """
     cleaned = ''.join(abc.split())
 
     if cleaned[:2] == 'C:':
@@ -24,6 +31,10 @@ def remove_whitespace(abc):
 
 
 def safe_abc(abc):
+    """
+    Checks a string to see if it has non abc
+    characters in it. Returns False, if it does.
+    """
     # TODO - Make more robust, and elegant
     safe = True
 
@@ -33,8 +44,19 @@ def safe_abc(abc):
             return False
     return safe
 
+# endregion
+
+# region REMOVE REPEATS
+# region 1ST and 2ND REPEATS
+
 
 def remove_single_dual_repeat(abc, tune_id):
+    """
+    Takes an abc string, and the tune_id for
+    error messages, then removes a single 1st/2nd
+    ending. If there are multiple repeats, it calls
+    another function to separate the string.
+    """
     temp = abc.split(':|2')
     end = temp.pop()
     if len(temp) == 0: return '!!BAD ABC - BLANK END2!!'
@@ -86,7 +108,9 @@ def remove_single_dual_repeat(abc, tune_id):
 
 
 def remove_dual_repeat(abc, tune_id):
-
+    """
+    Removes the dual repeats, and returns the string.
+    """
     if len(abc) == 0:
         return ''
     elif abc[0] == '1' or abc[0] == ':':
@@ -162,8 +186,14 @@ def remove_dual_repeat(abc, tune_id):
         return '!!BAD ABC - END2!!'
     return cleaned
 
+# endregion
+
+# region SIMPLE REPEATS
 
 def remove_simple_repeat(abc, tune_id):
+    """
+    Takes a string and removes all simple repeats in the string.
+    """
     cleaned = ''
 
     if abc.count(':|') > abc.count('|:'):
@@ -192,8 +222,19 @@ def remove_simple_repeat(abc, tune_id):
                 cleaned += x + '|' + x + '|'
     return cleaned
 
+# endregion
+# endregion
+
+# region MAIN
+
 
 def print_bad_abc(abc, tune_id, extra=list()):
+    """
+    :param abc: A valid abc string
+    :param tune_id: The setting of the tune, as it is unique
+    :param extra: A list of strings which is optional, it prints them as extra
+    :return: None
+    """
     print()
     print('BAD ABC:  Tune-' + str(tune_id) + '   ', end='')
     if 'K:' in abc:
@@ -206,6 +247,11 @@ def print_bad_abc(abc, tune_id, extra=list()):
 
 
 def remove_repeats(abc, tune_id):
+    """
+    :param abc: A spaceless abc string
+    :param tune_id: The tune setting
+    :return: Either '!!BAD ABC!!' or a valid abc string
+    """
     if '|1' in abc or ':|2' in abc or '|[1' in abc or ':|[2' in abc:
         cleaned = remove_dual_repeat(abc, tune_id)
     elif '|:' in abc or ':|' in abc:
@@ -226,6 +272,11 @@ def remove_repeats(abc, tune_id):
 
 
 def clean(abc, tune_id):
+    """
+    :param abc: An abc string
+    :param tune_id: The tune setting
+    :return: Either '!!BAD ABC!!' or a valid abc string
+    """
     cleaned = remove_whitespace(abc)
     cleaned = remove_repeats(cleaned, tune_id)
     return cleaned
