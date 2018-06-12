@@ -21,14 +21,16 @@ class TestCleaner(unittest.TestCase):
         basic3 = '|A|B|C|D|'
         basic4 = '|A|B|]C|D|'
         basic5 = '[|A|B|C|D|'
-        basic6 = 'K:Dmaj|A|B|C|D|'
+        basic6 = 'C:Alejandro|A|B|C|D|'
+        basic7 = 'K:Dmaj|A|B|C|D|'
 
         quick_test(basic1)
         quick_test(basic2)
         quick_test(basic3)
         quick_test(basic4)
         quick_test(basic5)
-        quick_test(basic6, 'K:Dmaj|A|B|C|D|]')
+        quick_test(basic6)
+        quick_test(basic7, 'K:Dmaj|A|B|C|D|]')
 
     def test_simple_repeats(self):
         def quick_test(test_str, correct='A|A|B|B|C|C|D|D|]'):
