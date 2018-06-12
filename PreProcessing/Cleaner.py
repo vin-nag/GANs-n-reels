@@ -1,33 +1,49 @@
+import re
+
 # region CLEAN CHARACTERS
 
 
 def remove_whitespace(abc):
     """
-    Takes an abc string, and strips white space,
-    as well as consolidating similar grammar
+    Takes an abc string, and strips
+    the white space from it.
     """
-    cleaned = ''.join(abc.split())
+    abc = ''.join(abc.split())
+    abc = abc.replace("\\", "")
+    abc = abc.replace("\x14", "")
+    return abc
 
-    if cleaned[:2] == 'C:':
-        cleaned = cleaned[cleaned.index('|'):]
-    if cleaned[:3] == '[|:' or cleaned[:3] == '||:':
-        cleaned = '|:' + cleaned[3:]
-    if cleaned[:2] == '[|':
-        cleaned = cleaned[2:]
-    if cleaned[:1] == '|' and cleaned[:2] != '|:':
-        cleaned = cleaned[1:]
-    if cleaned[0] == ':':
-        cleaned = '|' + cleaned
-    if cleaned[-1] == ':':
-        cleaned = cleaned + '|'
 
-    cleaned = cleaned.replace("\\", "")
-    cleaned = cleaned.replace("\x14", "")
-    cleaned = cleaned.replace('|]', '||')
-    cleaned = cleaned.replace('::', ':||:')
-    cleaned = cleaned.replace(':|:', ':||:')
-    cleaned = cleaned.replace(':|||:', ':||:')
-    return cleaned
+def clean_repeats(abc):
+    """
+    Takes barlines and repeats and
+    cleans them to a more regular style.
+    """
+    # Replaces mistyped repeats
+    abc = abc.replace(';', ':')
+
+    # If the composer data is in the abc string, this
+    # trims everything before the first barline.
+    if abc[:2] == 'C:':
+        abc = abc[abc.index('|'):]
+
+    # Replacing alternate barline notations, that is:
+    # '[|', '|]' and, for whatever reason, '|!|'
+    abc = re.sub('(\|]+)|(\[+\|)|(\|!\|)', '||', abc)
+
+    # Fixing malformed repeats at the beginning and end of string
+    if abc[0] == ':': abc = '|' + abc
+    if abc[-1] == ':': abc = abc + '|'
+
+    # Take any :: shorthand and convert it to ':||:'
+    abc = re.sub(':\|*:+', ':||:', abc)
+
+    # Take any permutations 1st and 2nd endings,
+    # and consolidate them to a single grammar
+    abc = re.sub('(\|*\[?1\.?)', '|1', abc)
+    abc = re.sub('(:?\|+\[?2\.?)|(:\|1)', ':|2', abc)
+
+    return abc
 
 
 def safe_abc(abc):
@@ -47,6 +63,7 @@ def safe_abc(abc):
 # endregion
 
 # region REMOVE REPEATS
+
 # region 1ST and 2ND REPEATS
 
 
@@ -57,59 +74,42 @@ def remove_single_dual_repeat(abc, tune_id):
     ending. If there are multiple repeats, it calls
     another function to separate the string.
     """
+
+    # Split on the second ending, and check to make sure there are two parts.
     temp = abc.split(':|2')
-    end = temp.pop()
+    end2 = temp.pop()
     if len(temp) == 0: return '!!BAD ABC - BLANK END2!!'
+
+    # Take the first part, and remove the starting repeat if needed, then count the repeats
     x = temp[0]
     if x[:2] == '|:': x = x[2:]
     lrpt = x.count('|:')
     rrpt = x.count(':|')
     cleaned = ''
 
-    try:
-        if lrpt == 0 and rrpt == 0:
-            beg, end1 = x.split('|1')
-            cleaned = beg + '|' + end1 + '|' + beg + '|' + end + '|'
-            cleaned = remove_repeats(cleaned, tune_id)
+    # If there are no repeats, it's of form ABAC
+    if lrpt == 0 and rrpt == 0:
+        beg, end1 = x.split('|1')
+        cleaned = beg + '|' + end1 + '|' + beg + '|' + end2 + '|'
+        cleaned = remove_repeats(cleaned, tune_id)
 
-        elif lrpt == 1 and rrpt == 0:
-            up, rem = x.split('|:')
-            beg, end1 = rem.split('|1')
-            cleaned = up + '|' + beg + '|' + end1 + '|' + beg + '|' + end + '|'
-            cleaned = remove_repeats(cleaned, tune_id)
+    # Otherwise, since there's only simple repeats in the piece,
+    # split at the last '|:', parsing the first using
+    else:
+        simple, ends = x.rsplit('|:', 1)
+        beg, end1 = ends.split('|1')
+        cleaned = remove_simple_repeats(simple, tune_id) + '|' + beg + '|' + end1 + '|' + beg + '|' + end2 + '|'
 
-        else:
-            subs = x.split(':|')
-            if '|1' not in subs[-1]:
-                raise ValueError
-
-            elif len(subs) > 1:
-                e = subs.pop()
-                while '||' in e: e = e.replace('||', '|')
-                if e[0] == ':': e = '|' + e
-                for y in subs: cleaned += remove_simple_repeat(y + ':|', tune_id)
-                end = remove_repeats(e + ':|2' + end, tune_id)
-                cleaned += end
-            else:
-                x = subs[0]
-                subs = x.split('|:')
-                end = subs.pop() + ':|2' + end
-                beg = '|:'.join(subs)
-
-                beg = remove_simple_repeat(beg, tune_id)
-                end = remove_repeats(end, tune_id)
-                cleaned = beg + end
-
-        if ':|' in cleaned or '|:' in cleaned:
-            raise ValueError
-        return cleaned
-    except ValueError:
+    if ':|' in cleaned or '|:' in cleaned:
         return '!!BAD ABC - VALUE ERROR - SIMPLE!!'
+    return cleaned
 
 
 def remove_dual_repeat(abc, tune_id):
     """
-    Removes the dual repeats, and returns the string.
+    Takes the string, and splits into pieces, specifically
+    the beginning 1st ending and 2nd ending, then reconstructs
+    it explicitly without the repeats, and returns the string.
     """
     if len(abc) == 0:
         return ''
@@ -117,69 +117,63 @@ def remove_dual_repeat(abc, tune_id):
         return '!!BAD ABC - MALFORM STRING!!'
 
     cleaned = ''
-    abc = abc.replace(']|', '||')
-    abc = abc.replace('|!|', '|||')
-    syn1 = ['|[1', '[1', '1.']
-    syn2 = [':|2.', ':|[2', ':||2', ':|||2', '|[2', ':|1']
-    for x in syn1: abc = abc.replace(x, '|1')
-    for x in syn2: abc = abc.replace(x, ':|2')
     count1 = abc.count('|1')
     count2 = abc.count(':|2')
 
+    # If the number of 1st and 2nd endings are the same,
+    # we can somewhat safely assume that the structure is sound
     if count1 == count2:
-        good_str = True
         temp = abc.split(':|2')
         end = temp.pop()
+        good_str = True
         for x in temp: good_str = good_str and ('|1' in x)
 
         if good_str:
-            if len(temp) >= 2:
-                try:
-                    for x in range(count1):
-                        loc1 = abc.index('|1') + 1
-                        loc2 = abc.index(':|2') + 2
-                        bars = 0
-                        fin = loc2
-                        while loc1 < loc2:
-                            loc1 += 1
-                            if abc[loc1] != '|':
-                                continue
-                            else:
-                                while abc[loc1] == '|':
-                                    loc1 += 1
-                                bars += 1
+            try:
+                for x in range(count1):
+                    loc1 = abc.index('|1') + 1
+                    loc2 = abc.index(':|2') + 2
+                    bars = 0
+                    fin = loc2
 
-                        while bars > 0:
-                            fin += 1
-                            if fin >= len(abc): break
-                            if abc[fin] != '|':
-                                continue
-                            else:
-                                while abc[fin] == '|':
-                                    fin += 1
-                                    if fin >= len(abc): break
-                                bars -= 1
-                        fin -= 1
-                        sub = abc[:fin]
-                        abc = abc[fin:]
-                        cleaned += remove_single_dual_repeat(sub, tune_id)
-                except ValueError:
-                    return '!!BAD ABC!!'
+                    # TODO - Simplify this using regex.
+                    # Count the groups of '|' in the ranges of the abc string
+                    # This approach does assume that the 1st and 2nd ending are
+                    # of the same bar length, though that's reasonable considering
+                    # the AABB format of most Irish music.
 
-            elif len(temp) == 1:
-                cleaned = remove_single_dual_repeat(abc, tune_id)
+                    while loc1 < loc2:
+                        loc1 += 1
+                        if abc[loc1] != '|':
+                            continue
+                        else:
+                            while abc[loc1] == '|':
+                                loc1 += 1
+                            bars += 1
+
+                    while bars > 0:
+                        fin += 1
+                        if fin >= len(abc): break
+                        if abc[fin] != '|':
+                            continue
+                        else:
+                            while abc[fin] == '|':
+                                fin += 1
+                                if fin >= len(abc): break
+                            bars -= 1
+
+                    sub = abc[:fin-1]
+                    abc = abc[fin-1:]
+                    cleaned += remove_single_dual_repeat(sub, tune_id)
+            except ValueError:
+                return '!!BAD ABC!!'
         else:
             return '!!BAD ABC - MISMATCH ENDS!!'
-
+    # Otherwise, something is very wrong
     elif count1 > count2:
-        if abc.count('|2') != abc.count(':|2'):
-            abc = abc.replace('|2', ':|2')
-            abc = abc.replace('::|2', ':|2')
-            cleaned = remove_dual_repeat(abc, tune_id)
-        else:
-            # TODO - 140? 100?
-            #print(abc)
-            return '!!BAD ABC - END1!!'
+        # TODO - 140? 100?
+        #print(abc)
+        return '!!BAD ABC - END1!!'
     elif count2 > count1:
         # TODO
         #print(abc)
@@ -187,12 +181,13 @@ def remove_dual_repeat(abc, tune_id):
     return cleaned
 
 # endregion
-
 # region SIMPLE REPEATS
 
-def remove_simple_repeat(abc, tune_id):
+
+def remove_simple_repeats(abc, tune_id):
     """
-    Takes a string and removes all simple repeats in the string.
+    Takes a string, which only has simple repeats in it and
+    returns a string with the repeats explicitly written.
     """
     cleaned = ''
 
@@ -200,10 +195,10 @@ def remove_simple_repeat(abc, tune_id):
         temp = abc.split(':|')
         end = temp.pop()
         if '|:' in end:
-            end = remove_simple_repeat(end, tune_id)
+            end = remove_simple_repeats(end, tune_id)
         for x in temp:
             if '|:' in x:
-                cleaned += remove_simple_repeat(x, tune_id) + '|'
+                cleaned += remove_simple_repeats(x, tune_id) + '|'
             else:
                 cleaned += x + '|' + x + '|'
         cleaned += end + '|'
@@ -212,17 +207,18 @@ def remove_simple_repeat(abc, tune_id):
         temp = abc.split('|:')
         beg = temp.pop(0)
         if ':|' in beg:
-            cleaned = remove_simple_repeat(beg, tune_id)
+            cleaned = remove_simple_repeats(beg, tune_id)
         else:
             cleaned = beg + '|'
         for x in temp:
             if ':|' in x:
-                cleaned += remove_simple_repeat(x, tune_id)
+                cleaned += remove_simple_repeats(x, tune_id)
             else:
                 cleaned += x + '|' + x + '|'
     return cleaned
 
 # endregion
+
 # endregion
 
 # region MAIN
@@ -252,20 +248,25 @@ def remove_repeats(abc, tune_id):
     :param tune_id: The tune setting
     :return: Either '!!BAD ABC!!' or a valid abc string
     """
-    if '|1' in abc or ':|2' in abc or '|[1' in abc or ':|[2' in abc:
+
+    # If the sone has first or second endings, we need to remove those first
+    if '|1' in abc or ':|2' in abc:
         cleaned = remove_dual_repeat(abc, tune_id)
+    # Otherwise, if it has repeats, we deal with those
     elif '|:' in abc or ':|' in abc:
-        cleaned = remove_simple_repeat(abc, tune_id)
+        cleaned = remove_simple_repeats(abc, tune_id)
+    # If there are no repeats, return the spaceless string
     else:
         cleaned = abc
 
+    # abc = re.sub('(\|+]+)|(\[+\|+)|(\|+)', '|', abc)
     while '||' in cleaned: cleaned = cleaned.replace('||', '|')
     while '|]' in cleaned: cleaned = cleaned.replace('|]', '|')
     while '[|' in cleaned: cleaned = cleaned.replace('[|', '|')
     if cleaned[0] == '|': cleaned = cleaned[1:]
 
     if '!!BAD ABC' in cleaned:
-        print_bad_abc(abc, tune_id)
+        # print_bad_abc(abc, tune_id)
         return '!!BAD ABC!!'
 
     return cleaned + "]"
@@ -278,7 +279,8 @@ def clean(abc, tune_id):
     :return: Either '!!BAD ABC!!' or a valid abc string
     """
     cleaned = remove_whitespace(abc)
+    cleaned = clean_repeats(cleaned)
     cleaned = remove_repeats(cleaned, tune_id)
     return cleaned
 
-
+# endregion
