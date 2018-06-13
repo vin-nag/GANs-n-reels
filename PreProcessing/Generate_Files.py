@@ -30,7 +30,7 @@ def update_tunes():
         print(e)
 
 
-def create_dict_list(tunes, types=None, meters=None, modes=None, check_abc=True):
+def create_dict_list(tunes, types=None, meters=None, modes=None):
     """
     Creates a list of tunes dictionaries, which can be restricted based on style/time.
     :param tunes: List of 'tune' dictionaries.
@@ -52,18 +52,15 @@ def create_dict_list(tunes, types=None, meters=None, modes=None, check_abc=True)
         if meters and t['meter'] not in meters: continue
         if modes and t['mode'] not in modes: continue
 
-        # If the tune either doesn't need to be checked, or is checked
-        # and doesn't contain invalid characters
-        if (not check_abc) or Clean.safe_abc(t['abc']):
-            # Make a new dict and save only the useful categories,
-            # as well as the cleaned, repeatless abc, and append it
-            # to the list
-            tune = dict()
-            cats = ["tune", "setting", "type", "meter", "mode"]
-            for c in cats: tune[c] = t[c]
-            tune['abc'] = Clean.clean(t['abc'], tune['setting'])
-            if tune['abc'] != '!!BAD ABC!!':
-                cleaned.append(tune)
+        # Make a new dict and save only the useful categories,
+        # as well as the cleaned, repeatless abc, and append it
+        # to the list
+        tune = dict()
+        cats = ["tune", "setting", "type", "meter", "mode"]
+        for c in cats: tune[c] = t[c]
+        tune['abc'] = Clean.clean(t['abc'], tune['setting'])
+        if tune['abc'] != '!!BAD ABC!!':
+            cleaned.append(tune)
 
     # Finally, sort the list for human readability.
     return cleaned
@@ -87,7 +84,7 @@ def dicts_to_file(cleaned, fname):
         f.write("\n}")
 
 
-def master_clean(py_out, stats_out=None, types=None, meters=None, modes=None, check_abc=True, default_folder='../Tunes/'):
+def master_clean(py_out, stats_out=None, types=None, meters=None, modes=None, default_folder='../Tunes/'):
     """
 
     :param py_out: Name of the file for the dict. Ex: 'Tunes.py'
@@ -99,9 +96,6 @@ def master_clean(py_out, stats_out=None, types=None, meters=None, modes=None, ch
     Skips parsing the tune if it doesn't fit the parameters.
     :param modes: A list of strings which is checked against the appropriate dict key.
     Skips parsing the tune if it doesn't fit the parameters.
-    :param check_abc: If true, omits any tunes which contain characters not found in the
-    abc grammar. The check is very aggressive. It may be deprecated, or incoprated into
-    the normal filtering in the future.
     :param default_folder: Optional path of a folder that the files should be saved in.
     Default is: '../Tunes/'
     :return:
@@ -110,7 +104,7 @@ def master_clean(py_out, stats_out=None, types=None, meters=None, modes=None, ch
     from PreProcessing import Generate_Stats
     # Sort the tunes and hand it to the cleaning function.
     tunes = sorted(raw.tunes, key=lambda x: int(x['setting']), reverse=True)
-    clean = create_dict_list(tunes, types=types, meters=meters, modes=modes, check_abc=check_abc)
+    clean = create_dict_list(tunes, types=types, meters=meters, modes=modes)
 
     # Generate the stats of the cleaned tunes and save them. Has a small check to prevent a file-out error.
     if stats_out:
@@ -121,15 +115,15 @@ def master_clean(py_out, stats_out=None, types=None, meters=None, modes=None, ch
 
 
 def simple_clean():
-    master_clean('Tunes_cleaned.py', stats_out='Stats_cleaned.txt', check_abc=False)
+    master_clean('Tunes_cleaned.py', stats_out='Stats_cleaned.txt')
 
 
 def jigs_and_reels():
-    master_clean('Tunes_JR.py', stats_out='Stats_JR.txt', types=['jig', 'reel'], check_abc=False)
+    master_clean('Tunes_JR.py', stats_out='Stats_JR.txt', types=['jig', 'reel'])
 
 
 def common_time_clean():
-    master_clean('Common_Time.py', stats_out='Common_Time_Stats.txt', meters=['4/4'], check_abc=False)
+    master_clean('Common_Time.py', stats_out='Common_Time_Stats.txt', meters=['4/4'])
 
 
 if __name__ == '__main__':

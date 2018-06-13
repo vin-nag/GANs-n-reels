@@ -75,21 +75,6 @@ def remove_ornaments(abc):
     # abc = re.sub('\(3', 'T', abc)
     # abc = re.sub('[()]', '', abc)
     return abc
-
-
-def safe_abc(abc):
-    """
-    Checks a string to see if it has non abc
-    characters in it. Returns False, if it does.
-    """
-    # TODO - Make more robust, and elegant
-    safe = True
-
-    bad_chars = ['\"', 'V', 'T', 'K:', 'M:', '{', '}', '~']
-    for c in bad_chars:
-        if c in abc:
-            return False
-    return safe
 # endregion
 
 # region REMOVE REPEATS
@@ -293,7 +278,7 @@ def remove_repeats(abc, tune_id):
     bars = cleaned.split('|')
     for y in bars:
         bar = y
-        chars = [x for x in "zabcdefgABCDEFG23456789()]-^=_,></'"]
+        chars = [x for x in "zabcdefgABCDEFG23468()]-^=_,></'"]
         for z in chars:
             bar = bar.replace(z, '')
         if bar != '':
@@ -304,8 +289,6 @@ def remove_repeats(abc, tune_id):
     if '!!BAD ABC' in cleaned:
         # print_bad_abc(abc, tune_id)
         return '!!BAD ABC!!'
-
-
 
     while '||' in cleaned: cleaned = cleaned.replace('||', '|')
     if cleaned[0] == '|': cleaned = cleaned[1:]
