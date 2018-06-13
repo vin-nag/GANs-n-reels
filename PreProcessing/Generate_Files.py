@@ -1,4 +1,4 @@
-from PreProcessing import Cleaner_Copy as Clean
+from PreProcessing import Cleaner as Clean
 from datetime import datetime
 from requests import get
 from requests.exceptions import RequestException
@@ -54,7 +54,7 @@ def create_dict_list(tunes, types=None, meters=None, modes=None, check_abc=True)
 
         # If the tune either doesn't need to be checked, or is checked
         # and doesn't contain invalid characters
-        if (not check_abc) and Clean.safe_abc(t['abc']):
+        if (not check_abc) or Clean.safe_abc(t['abc']):
             # Make a new dict and save only the useful categories,
             # as well as the cleaned, repeatless abc, and append it
             # to the list
@@ -62,10 +62,10 @@ def create_dict_list(tunes, types=None, meters=None, modes=None, check_abc=True)
             cats = ["tune", "setting", "type", "meter", "mode"]
             for c in cats: tune[c] = t[c]
             tune['abc'] = Clean.clean(t['abc'], tune['setting'])
-            cleaned.append(tune)
+            if tune['abc'] != '!!BAD ABC!!':
+                cleaned.append(tune)
 
     # Finally, sort the list for human readability.
-    cleaned = sorted(cleaned, key=lambda x: int(x['setting']), reverse=True)
     return cleaned
 
 

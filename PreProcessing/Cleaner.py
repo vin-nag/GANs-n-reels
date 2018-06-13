@@ -14,17 +14,18 @@ def remove_whitespace(abc):
     return abc
 
 
-def clean_repeats(abc):
+def clean_grammar(abc):
     """
     Takes barlines and repeats and
     cleans them to a more regular style.
     """
     # Replaces mistyped repeats
     abc = abc.replace(';', ':')
+    abc = re.sub('[’`´]', '\'', abc)
 
     # If the composer data is in the abc string, this
     # trims everything before the first barline.
-    if abc[:2] == 'C:':
+    if abc[:2] == 'C:' or abc[:2] == 'R:':
         abc = abc[abc.index('|'):]
 
     # Replacing alternate barline notations, that is:
@@ -46,6 +47,36 @@ def clean_repeats(abc):
     return abc
 
 
+def remove_ornaments(abc):
+    """
+        Ornamentation represents trills or other performance enhancers
+        See http://abcnotation.com/wiki/abc:standard:v2.1#decorations
+        .            staccato mark
+        ~            Irish roll
+        H            fermata
+        L            accent or emphasis
+        M            lowermordent
+        O            coda
+        P            uppermordent
+        S            segno
+        T            trill
+        u            up-bow
+        v            down-bow
+        *            ???
+        $            ???
+        J            ???
+    """
+
+    # Removes any of the instructions between '!' and the old '+'
+    abc = re.sub('(!.{1,16}!)|(\+.{1,16}\+)|(\{[\^=_\w,\'/]+?\})|(".*?")', '', abc)
+    abc = re.sub('[\.~HLMOPSTuv\*\$J]', '', abc)
+
+    # Convert the triplets to 'T' before braces are removed, so structure is preserved
+    # abc = re.sub('\(3', 'T', abc)
+    # abc = re.sub('[()]', '', abc)
+    return abc
+
+
 def safe_abc(abc):
     """
     Checks a string to see if it has non abc
@@ -54,16 +85,14 @@ def safe_abc(abc):
     # TODO - Make more robust, and elegant
     safe = True
 
-    bad_chars = ['\"', 'V', 'T', 'K:', 'M', '{', '}', '~']
+    bad_chars = ['\"', 'V', 'T', 'K:', 'M:', '{', '}', '~']
     for c in bad_chars:
         if c in abc:
             return False
     return safe
-
 # endregion
 
 # region REMOVE REPEATS
-
 # region 1ST and 2ND REPEATS
 
 
@@ -179,7 +208,6 @@ def remove_dual_repeat(abc, tune_id):
         #print(abc)
         return '!!BAD ABC - END2!!'
     return cleaned
-
 # endregion
 # region SIMPLE REPEATS
 
@@ -216,9 +244,7 @@ def remove_simple_repeats(abc, tune_id):
             else:
                 cleaned += x + '|' + x + '|'
     return cleaned
-
 # endregion
-
 # endregion
 
 # region MAIN
@@ -260,16 +286,31 @@ def remove_repeats(abc, tune_id):
         cleaned = abc
 
     # abc = re.sub('(\|+]+)|(\[+\|+)|(\|+)', '|', abc)
-    while '||' in cleaned: cleaned = cleaned.replace('||', '|')
-    while '|]' in cleaned: cleaned = cleaned.replace('|]', '|')
-    while '[|' in cleaned: cleaned = cleaned.replace('[|', '|')
-    if cleaned[0] == '|': cleaned = cleaned[1:]
+    cleaned = cleaned.replace('!', '')
+    while ']' in cleaned: cleaned = cleaned.replace(']', '|')
+
+    # re.sub("[zabcdefgABCDEFG2345678()\]-^=_,></']", '', y)
+    bars = cleaned.split('|')
+    for y in bars:
+        bar = y
+        chars = [x for x in "zabcdefgABCDEFG23456789()]-^=_,></'"]
+        for z in chars:
+            bar = bar.replace(z, '')
+        if bar != '':
+            # print(tune_id)
+            cleaned = '!!BAD ABC - INVALID CHARS!!'
+            break
 
     if '!!BAD ABC' in cleaned:
         # print_bad_abc(abc, tune_id)
         return '!!BAD ABC!!'
 
-    return cleaned + "]"
+
+
+    while '||' in cleaned: cleaned = cleaned.replace('||', '|')
+    if cleaned[0] == '|': cleaned = cleaned[1:]
+
+    return cleaned
 
 
 def clean(abc, tune_id):
@@ -278,9 +319,10 @@ def clean(abc, tune_id):
     :param tune_id: The tune setting
     :return: Either '!!BAD ABC!!' or a valid abc string
     """
-    cleaned = remove_whitespace(abc)
-    cleaned = clean_repeats(cleaned)
-    cleaned = remove_repeats(cleaned, tune_id)
-    return cleaned
+    abc = remove_whitespace(abc)
+    abc = clean_grammar(abc)
+    abc = remove_ornaments(abc)
 
+    cleaned = remove_repeats(abc, tune_id)
+    return cleaned
 # endregion
