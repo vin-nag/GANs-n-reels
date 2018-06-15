@@ -16,31 +16,25 @@ def remove_whitespace(abc):
 
 def clean_grammar(abc):
     """
-    Takes barlines and repeats and
-    cleans them to a more regular style.
+    Cleans the varying user input possibilities into a more
+    consistent grammar to help simplify future processing
     """
-    # Replaces mistyped repeats
+    # Replaces mistyped repeats and apostrophes
     abc = abc.replace(';', ':')
     abc = re.sub('[’`´]', '\'', abc)
 
-    # If the composer data is in the abc string, this
-    # trims everything before the first barline.
+    # Handles extra data in the abc string
+    if 'M:' in abc: return '!!BAD ABC - EXTRA TIME SIGNATURE!!'
     if abc[:2] == 'C:' or abc[:2] == 'R:':
         abc = abc[abc.index('|'):]
 
-    # Replacing alternate barline notations, that is:
-    # '[|', '|]' and, for whatever reason, '|!|'
+    # Replaces alternate barline notations
     abc = re.sub('(\|]+)|(\[+\|)|(\|!\|)', '||', abc)
 
-    # Fixing malformed repeats at the beginning and end of string
+    # Consolidates repeat grammar
     if abc[0] == ':': abc = '|' + abc
     if abc[-1] == ':': abc = abc + '|'
-
-    # Take any :: shorthand and convert it to ':||:'
     abc = re.sub(':\|*:+', ':||:', abc)
-
-    # Take any permutations 1st and 2nd endings,
-    # and consolidate them to a single grammar
     abc = re.sub('(\|*\[?1\.?)', '|1', abc)
     abc = re.sub('(:?\|+\[?2\.?)|(:\|1)', ':|2', abc)
 
@@ -48,6 +42,11 @@ def clean_grammar(abc):
 
 
 def remove_ornaments(abc):
+    """
+    Removes ornamentation from the abc string, as
+    well as converting triplets and other non base-two
+    timing into other characters
+    """
     """
         Ornamentation represents trills or other performance enhancers
         See http://abcnotation.com/wiki/abc:standard:v2.1#decorations
@@ -69,11 +68,126 @@ def remove_ornaments(abc):
 
     # Removes any of the instructions between '!' and the old '+'
     abc = re.sub('(!.{1,16}!)|(\+.{1,16}\+)|(\{[\^=_\w,\'/]+?\})|(".*?")', '', abc)
-    abc = re.sub('[\.~HLMOPSTuv\*\$J]', '', abc)
+    abc = re.sub('[\.~HLMOPSTuv\*\$J!]', '', abc)
 
-    # Convert the triplets to 'T' before braces are removed, so structure is preserved
-    # abc = re.sub('\(3', 'T', abc)
-    # abc = re.sub('[()]', '', abc)
+    # Preserve triplets, swap out any other length modifiers, then nuke parenthesis
+    abc = re.sub('\(3', 'T', abc)
+    abc = re.sub('\([\d]', 'X', abc)
+    abc = re.sub('[()]', '', abc)
+
+    return abc
+
+
+def clean_note_lengths(abc):
+    """
+    Takes the abc string, and removes swung notes and triplets
+    """
+
+    # Removes bad or complex timing information
+    abc = re.sub(r'([<>])\1+', r'\1', abc)
+    abc = re.sub('<>|><', '', abc)
+    abc = abc.replace('//', '/4')
+    abc = re.sub('([_=^]*[a-gzA-g][,\']*)/([^\d/])', r'\1/2\2', abc)
+    abc = re.sub('([_=^]*[a-gzA-g][,\']*)/([^\d/])', r'\1/2\2', abc)
+
+    def remove_swing(x):
+        # If the length is 1 or less, set i to the denominator
+        if x.group(2) == '': i = '2'
+        elif '/' in x.group(2): i = str(int(x.group(2)[1])*2)
+        # Otherwise, fractions aren't required
+        else:
+            c = int(x.group(2))
+            if x.group(3) == '>': return x.group(1) + str(int(c*1.5)) + x.group(4) + str(int(c*0.5))
+            else: return x.group(1) + str(int(c*0.5)) + x.group(4) + str(int(c*1.5))
+
+        if x.group(3) == '>': return x.group(1) + '3/' + i + x.group(4) + '1/' + i
+        else: return x.group(1) + '1/' + i + x.group(4) + '3/' + i
+
+    # This matches all the equal length swing time notes
+    abc = re.sub(r'([_=^]*[a-gzA-G][,\']*)(/?[\d]?)([<>])([_=^]*[a-gzA-G][,\']*)\2', remove_swing, abc)
+    if '>' in abc or '<' in abc: return '!!BAD ABC - SWING NOT REMOVED!!'
+
+    def remove_triplet(m):
+        s = m.group()
+        x = re.findall('([_=^]*[a-gzA-g][,\']*)(/?[\d]?)', s[1:])
+        abc = ''
+        for i in x:
+            if   i[1] == '/4':  abc += i[0] + '1/6'
+            elif i[1] == '/2':  abc += i[0] + '1/3'
+            elif i[1] == '':    abc += i[0] + '2/3'
+            elif i[1] == '2':   abc += i[0] + '4/3'
+            elif i[1] == '3':   abc += i[0]
+            elif i[1] == '4':   abc += i[0] + '4/3'
+            else:               return s
+        return abc
+
+    # This matches all the equal length triplets
+    if '/3' in abc: return '!!BAD ABC - INVALID TRIPLET (/3)!!'
+    abc = re.sub('T([_=^]*[a-gzA-g][,\']*/?[\d]?){3}', remove_triplet, abc)
+    if 'T' in abc: return '!!BAD ABC - TRIPLET NOT REMOVED!!'
+
+    return abc
+
+
+def remove_ties(abc, tune_id):
+    # TODO - Remove barlines before parsing
+    # Current character set for operational grammar: "^=_ zabcdefgABCDEFG ,' /23468 - |"
+
+    # Regex for pitch half: "([\^=_]?[za-gA-G][,']*)"
+    # Regex for length half: "(/?[\d]*)"
+    # Regex for full tie: "([\^=_]?[za-gA-G][,']*/?[\d]*-[\^=_]?[za-gA-G][,']*/?[\d]*)"
+    chars = '^=_zabcdefgABCDEFG,\''
+
+    # Remove ties that are mutli-character
+    abc = re.sub('--+', '-', abc)
+    if abc[-1] == '-': return '!!BAD ABC - UNFINISHED TIE!!'
+    count = abc.count('-')
+    for x in range(count):
+        i = abc.find('-')
+        end_i = i + 1
+        start_i = i - 1
+
+        # Check that the tie isn't connected to a barline,
+        # and if it's note save the pitch
+        note2 = abc[end_i]
+        if note2 not in chars or abc[start_i] == '|': continue
+
+        # Increment the end index until we hit the next note.
+        while end_i + 1 < len(abc) and abc[end_i + 1] not in chars and abc[end_i + 1] not in '|-': end_i += 1
+        end_i += 1
+        # Decrement the start index until we hit a pitch, then save it.
+        while start_i > 0 and abc[start_i] not in chars: start_i -= 1
+        note1 = abc[start_i]
+
+        if note1 != note2:
+            # If the two pitches differ, the tie is used as a slur, and is removed.
+            abc = abc[:i] + abc[i+1:]
+        else:
+            # Otherwise, consolidate the notes.
+            start = abc[start_i:i]
+            end = abc[i + 1:end_i]
+
+            if start == end:
+                if len(start) == 1: abc = abc[:start_i] + start + '2' + abc[end_i:]
+                elif len(start) == 2:
+                    if start[1] == '/': abc = abc[:start_i] + start + abc[end_i:]
+                    elif start[1].isdigit(): abc = abc[:start_i] + start[0] + str(int(start[1])*2) + abc[end_i:]
+                    elif start[1] in '\',': abc = abc[:start_i] + start + '2' + abc[end_i:]
+                    else: print('len(2) unknown: ' + start); return '!!BAD ABC - Unknown Parse Branch'
+                elif len(start) == 3:
+                    if start[1] == '/':
+                        if start[2] == '2': abc = abc[:start_i] + start[0] + abc[end_i:]
+                        else: abc = abc[:start_i] + start[0] + str(int(start[1])/2) + abc[end_i:]
+                    else: print('len(3) unknown: ' + start); return '!!BAD ABC - Unknown Parse Branch'
+                else: print('start == end unkown: ' + start); return '!!BAD ABC - Unknown Parse Branch'
+            else:
+                if (start[-1] == '/' and start[-2].isdigit()) or (end[-1] == '/' and end[-2].isdigit()):
+                    return '!!BAD ABC - Invalid Timing info!!'
+                else:
+                    print(start)
+                    print(end)
+                    print()
+
     return abc
 # endregion
 
@@ -257,10 +371,10 @@ def remove_repeats(abc, tune_id):
     """
     :param abc: A spaceless abc string
     :param tune_id: The tune setting
-    :return: Either '!!BAD ABC!!' or a valid abc string
+    :return: An abc string, without repeats, and single barlines
     """
 
-    # If the sone has first or second endings, we need to remove those first
+    # If the song has first or second endings, we need to remove those first
     if '|1' in abc or ':|2' in abc:
         cleaned = remove_dual_repeat(abc, tune_id)
     # Otherwise, if it has repeats, we deal with those
@@ -270,30 +384,29 @@ def remove_repeats(abc, tune_id):
     else:
         cleaned = abc
 
-    # abc = re.sub('(\|+]+)|(\[+\|+)|(\|+)', '|', abc)
-    cleaned = cleaned.replace('!', '')
     while ']' in cleaned: cleaned = cleaned.replace(']', '|')
-
-    # re.sub("[zabcdefgABCDEFG2345678()\]-^=_,></']", '', y)
-    bars = cleaned.split('|')
-    for y in bars:
-        bar = y
-        chars = [x for x in "zabcdefgABCDEFG23468()]-^=_,></'"]
-        for z in chars:
-            bar = bar.replace(z, '')
-        if bar != '':
-            # print(tune_id)
-            cleaned = '!!BAD ABC - INVALID CHARS!!'
-            break
-
-    if '!!BAD ABC' in cleaned:
-        # print_bad_abc(abc, tune_id)
-        return '!!BAD ABC!!'
-
     while '||' in cleaned: cleaned = cleaned.replace('||', '|')
     if cleaned[0] == '|': cleaned = cleaned[1:]
 
     return cleaned
+
+
+def remove_bad_tunes(abc):
+    """
+     Checks if the song has qualities which make it unusable.
+    """
+
+    # Removes any songs less than X+1 bars long.
+    if abc.count('|') < 15:
+        return '!!BAD ABC - SHORT PIECE'
+
+    # Removes and song which has characters not contained in the defined grammar
+    chars = set(x for x in "zabcdefgABCDEFG23468T-^=_,></'|")
+    tune = set(x for x in abc)
+    if len(tune - chars) != 0:
+        return '!!BAD ABC - INVALID CHARS!!'
+
+    return abc
 
 
 def clean(abc, tune_id):
@@ -305,7 +418,13 @@ def clean(abc, tune_id):
     abc = remove_whitespace(abc)
     abc = clean_grammar(abc)
     abc = remove_ornaments(abc)
-
     cleaned = remove_repeats(abc, tune_id)
+    cleaned = remove_bad_tunes(cleaned)
+    cleaned = clean_note_lengths(cleaned)
+    # if '-' in cleaned: cleaned = remove_ties(cleaned, tune_id)
+
+    if '!!BAD ABC' in cleaned:
+        # print_bad_abc(abc, tune_id)
+        return '!!BAD ABC!!'
     return cleaned
 # endregion
