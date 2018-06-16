@@ -3,22 +3,15 @@ import re
 # region CLEAN CHARACTERS
 
 
-def remove_whitespace(abc):
-    """
-    Takes an abc string, and strips
-    the white space from it.
-    """
-    abc = ''.join(abc.split())
-    abc = abc.replace("\\", "")
-    abc = abc.replace("\x14", "")
-    return abc
-
-
 def clean_grammar(abc):
     """
     Cleans the varying user input possibilities into a more
     consistent grammar to help simplify future processing
     """
+    abc = ''.join(abc.split())
+    abc = abc.replace("\\", "")
+    abc = abc.replace("\x14", "")
+
     # Replaces mistyped repeats and apostrophes
     abc = abc.replace(';', ':')
     abc = re.sub('[’`´]', '\'', abc)
@@ -111,17 +104,19 @@ def clean_note_lengths(abc):
         s = m.group()
         x = re.findall('([_=^]*[a-gzA-g][,\']*)(/?[\d]?)', s[1:])
         abc = ''
+        # For all the notes in x, use the current length to determine the new length
         for i in x:
-            if   i[1] == '/4':  abc += i[0] + '1/6'
-            elif i[1] == '/2':  abc += i[0] + '1/3'
+            if   i[1] == '/4':  abc += i[0] + '/6'
+            elif i[1] == '/2':  abc += i[0] + '/3'
             elif i[1] == '':    abc += i[0] + '2/3'
             elif i[1] == '2':   abc += i[0] + '4/3'
             elif i[1] == '3':   abc += i[0]
-            elif i[1] == '4':   abc += i[0] + '4/3'
-            else:               return s
+            elif i[1] == '4':   abc += i[0] + '8/3'
+            else:               return '!!BAD ABC - TRIPLET TOO SMALL!!'
         return abc
 
-    # This matches all the equal length triplets
+    # This matches all the equal length triplets, and removes
+    # grammatically incorrect strings
     if '/3' in abc: return '!!BAD ABC - INVALID TRIPLET (/3)!!'
     abc = re.sub('T([_=^]*[a-gzA-g][,\']*/?[\d]?){3}', remove_triplet, abc)
     if 'T' in abc: return '!!BAD ABC - TRIPLET NOT REMOVED!!'
@@ -213,7 +208,6 @@ def remove_single_dual_repeat(abc, tune_id):
     if x[:2] == '|:': x = x[2:]
     lrpt = x.count('|:')
     rrpt = x.count(':|')
-    cleaned = ''
 
     # If there are no repeats, it's of form ABAC
     if lrpt == 0 and rrpt == 0:
@@ -239,10 +233,11 @@ def remove_dual_repeat(abc, tune_id):
     the beginning 1st ending and 2nd ending, then reconstructs
     it explicitly without the repeats, and returns the string.
     """
-    if len(abc) == 0:
-        return ''
-    elif abc[0] == '1' or abc[0] == ':':
-        return '!!BAD ABC - MALFORM STRING!!'
+
+    # If the string is empty, do nothing. If the string starts with 1 or :,
+    # it is effectively un-salvageable.
+    if len(abc) == 0: return ''
+    elif abc[0] == '1' or abc[0] == ':': return '!!BAD ABC - MALFORM STRING!!'
 
     cleaned = ''
     count1 = abc.count('|1')
@@ -297,15 +292,9 @@ def remove_dual_repeat(abc, tune_id):
                 return '!!BAD ABC!!'
         else:
             return '!!BAD ABC - MISMATCH ENDS!!'
-    # Otherwise, something is very wrong
-    elif count1 > count2:
-        # TODO - 140? 100?
-        #print(abc)
-        return '!!BAD ABC - END1!!'
-    elif count2 > count1:
-        # TODO
-        #print(abc)
-        return '!!BAD ABC - END2!!'
+    # Otherwise, something is very wrong with the endings
+    elif count1 > count2: return '!!BAD ABC - END1!!'
+    elif count2 > count1: return '!!BAD ABC - END2!!'
     return cleaned
 # endregion
 # region SIMPLE REPEATS
@@ -318,35 +307,83 @@ def remove_simple_repeats(abc, tune_id):
     """
     cleaned = ''
 
+    # TODO - Remove barlines that separate pickup notes from endings.
     if abc.count(':|') > abc.count('|:'):
         temp = abc.split(':|')
+        # Remove the 'outside' element, as it isn't repeated
         end = temp.pop()
-        if '|:' in end:
-            end = remove_simple_repeats(end, tune_id)
+        # Unless it needs to be repeated due to the opposite repeat
+        if '|:' in end: end = remove_simple_repeats(end, tune_id)
         for x in temp:
-            if '|:' in x:
-                cleaned += remove_simple_repeats(x, tune_id) + '|'
-            else:
-                cleaned += x + '|' + x + '|'
+            # Process the chunk if it has the other repeat, otherwise double it
+            if '|:' in x: cleaned += remove_simple_repeats(x, tune_id) + '|'
+            else: cleaned += x + '|' + x + '|'
         cleaned += end + '|'
 
+    # Follows the above logic, just in reverse
     elif abc.count(':|') <= abc.count('|:'):
         temp = abc.split('|:')
         beg = temp.pop(0)
-        if ':|' in beg:
-            cleaned = remove_simple_repeats(beg, tune_id)
-        else:
-            cleaned = beg + '|'
+        if ':|' in beg: cleaned = remove_simple_repeats(beg, tune_id)
+        else: cleaned = beg + '|'
         for x in temp:
-            if ':|' in x:
-                cleaned += remove_simple_repeats(x, tune_id)
-            else:
-                cleaned += x + '|' + x + '|'
+            if ':|' in x: cleaned += remove_simple_repeats(x, tune_id)
+            else: cleaned += x + '|' + x + '|'
+
     return cleaned
 # endregion
 # endregion
 
 # region MAIN
+
+
+def check_time(abc):
+
+    def count_bar(bar):
+        time = re.findall('[_=^]*[a-gzA-G][,\']*([\d]*/?[\d]*)', bar)
+        numerators = []
+        denominators = []
+        s = 0
+        # For all the lengths in the bar
+        for y in time:
+                # No suffix is inherently 1
+                if len(y) == 0:
+                    s += 1
+                # If it's one character it's an integer
+                elif len(y) == 1:
+                    s += int(y)
+                # If it's two characters the numerator is implicitly 1
+                elif len(y) == 2:
+                    denominators.append(int(y[1]))
+                    numerators.append(1)
+                # Otherwise, there is a key numerator and denominator
+                else:
+                    denominators.append(int(y[2]))
+                    numerators.append(int(y[0]))
+
+        # Set the denominator to the LCM
+        denom = 1
+        for y in set(denominators): denom *= y
+        # Multiply each numerator by all the other factors, then sum them
+        for y in range(len(numerators)): numerators[y] *= (denom / denominators[y])
+        return s + (sum(numerators) / denom)
+
+    bars = abc.split('|')
+    s = 0
+    try:
+        for bar in bars: s += count_bar(bar)
+    except ValueError:
+        return '!!BAD ABC - INCORRECT BAR LENGTH!!'
+    if s % 4 == 0:
+        # There is an appropriate number of beats in the whole tune
+        return abc
+    else:
+        if (s - count_bar(bars[0])) % 4 == 0:
+            # The piece has the right number of beats, minus the pickup bar
+            return '!!BAD ABC - INCORRECT BAR LENGTH!!'
+        else:
+            # There is a non-standard number of beats somwhere other than the pickup
+            return '!!BAD ABC - INCORRECT BAR LENGTH!!'
 
 
 def print_bad_abc(abc, tune_id, extra=list()):
@@ -415,12 +452,12 @@ def clean(abc, tune_id):
     :param tune_id: The tune setting
     :return: Either '!!BAD ABC!!' or a valid abc string
     """
-    abc = remove_whitespace(abc)
     abc = clean_grammar(abc)
     abc = remove_ornaments(abc)
     cleaned = remove_repeats(abc, tune_id)
     cleaned = remove_bad_tunes(cleaned)
     cleaned = clean_note_lengths(cleaned)
+    cleaned = check_time(cleaned)
     # if '-' in cleaned: cleaned = remove_ties(cleaned, tune_id)
 
     if '!!BAD ABC' in cleaned:

@@ -1,56 +1,56 @@
 
-2018-06-15 01:10:40.836642
+2018-06-16 02:40:09.329707
 
-A total of 13357 tunes were scanned.
+A total of 11087 tunes were scanned.
 Max unique tune id is: 17040
 
 4 different types of SONG STYLES were found.
-hornpipe       - 1940  / 13357 -->    14.52%
-barndance      - 1167  / 13357 -->     8.74%
-reel           - 9585  / 13357 -->    71.76%
-strathspey     - 661   / 13357 -->     4.95%
+hornpipe       - 1544  / 11087 -->    13.93%
+barndance      - 972   / 11087 -->     8.77%
+reel           - 8068  / 11087 -->    72.77%
+strathspey     - 499   / 11087 -->     4.50%
 
 
 1 different types of TIME SIGNATURES were found.
-4/4            - 13356 / 13357 -->    99.99%
+4/4            - 11086 / 11087 -->    99.99%
 
 
 23 different types of KEY SIGNATURES were found.
-Gdorian        - 120   / 13357 -->     0.90%
-Edorian        - 700   / 13357 -->     5.24%
-Ddorian        - 165   / 13357 -->     1.24%
-Cdorian        - 23    / 13357 -->     0.17%
-Bmixolydian    - 8     / 13357 -->     0.06%
-Amajor         - 955   / 13357 -->     7.15%
-Gmixolydian    - 54    / 13357 -->     0.40%
-Bdorian        - 49    / 13357 -->     0.37%
-Aminor         - 351   / 13357 -->     2.63%
-Emajor         - 89    / 13357 -->     0.67%
-Amixolydian    - 493   / 13357 -->     3.69%
-Fmajor         - 232   / 13357 -->     1.74%
-Cmajor         - 329   / 13357 -->     2.46%
-Dmixolydian    - 339   / 13357 -->     2.54%
-Dmajor         - 3571  / 13357 -->    26.74%
-Eminor         - 648   / 13357 -->     4.85%
-Emixolydian    - 17    / 13357 -->     0.13%
-Dminor         - 150   / 13357 -->     1.12%
-Gmajor         - 3526  / 13357 -->    26.40%
-Adorian        - 868   / 13357 -->     6.50%
-Gminor         - 178   / 13357 -->     1.33%
-Bminor         - 446   / 13357 -->     3.34%
-Fdorian        - 23    / 13357 -->     0.17%
+Amajor         - 754   / 11087 -->     6.80%
+Emajor         - 77    / 11087 -->     0.69%
+Amixolydian    - 425   / 11087 -->     3.83%
+Gmixolydian    - 48    / 11087 -->     0.43%
+Bmixolydian    - 6     / 11087 -->     0.05%
+Gminor         - 143   / 11087 -->     1.29%
+Dminor         - 120   / 11087 -->     1.08%
+Gdorian        - 94    / 11087 -->     0.85%
+Emixolydian    - 15    / 11087 -->     0.14%
+Edorian        - 587   / 11087 -->     5.29%
+Fmajor         - 197   / 11087 -->     1.78%
+Bdorian        - 45    / 11087 -->     0.41%
+Gmajor         - 2940  / 11087 -->    26.52%
+Ddorian        - 135   / 11087 -->     1.22%
+Eminor         - 530   / 11087 -->     4.78%
+Adorian        - 752   / 11087 -->     6.78%
+Fdorian        - 18    / 11087 -->     0.16%
+Dmixolydian    - 281   / 11087 -->     2.53%
+Cmajor         - 251   / 11087 -->     2.26%
+Bminor         - 383   / 11087 -->     3.45%
+Dmajor         - 2945  / 11087 -->    26.56%
+Aminor         - 299   / 11087 -->     2.70%
+Cdorian        - 19    / 11087 -->     0.17%
 
 
 4 different types of MODE TYPES were found.
-minor          - ['A', 'E', 'D', 'G', 'B']
-major          - ['A', 'E', 'F', 'C', 'D', 'G']
-mixolydian     - ['B', 'G', 'A', 'D', 'E']
-dorian         - ['G', 'E', 'D', 'C', 'B', 'A', 'F']
+major          - ['A', 'E', 'F', 'G', 'C', 'D']
+mixolydian     - ['A', 'G', 'B', 'E', 'D']
+minor          - ['G', 'D', 'E', 'B', 'A']
+dorian         - ['G', 'E', 'B', 'D', 'A', 'F', 'C']
 
 
-minor          - 1773  / 13357 -->    13.27%
-major          - 8702  / 13357 -->    65.15%
-mixolydian     - 911   / 13357 -->     6.82%
-dorian         - 1948  / 13357 -->    14.58%
+major          - 7164  / 11087 -->    64.62%
+mixolydian     - 775   / 11087 -->     6.99%
+minor          - 1475  / 11087 -->    13.30%
+dorian         - 1650  / 11087 -->    14.88%
 
 
