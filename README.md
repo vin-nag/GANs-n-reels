@@ -27,5 +27,5 @@ We hope to use the distinctive structure of Irish tunes to make them suitable fo
 Though there are RNN-based Irish music generators, we found no GANs which successfully generated music. Unlike RNNs,  GANs could truly generate music from scratch,  rather than using prediction. To our knowledge, no one has presented the idea of organizing music like a picture, which makes our encoding unique.
 
 ## Results and Contributions:
-Our code and the results will be uploaded to an online repository for public access.
+Our code and the results will be uploaded to an online repository for public access [here:](https://github.com/vin-nag/GANs-n-reels)
 
