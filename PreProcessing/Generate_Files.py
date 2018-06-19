@@ -52,9 +52,6 @@ def create_dict_list(tunes, types=None, meters=None, modes=None):
         if meters and t['meter'] not in meters: continue
         if modes and t['mode'] not in modes: continue
 
-        # Make a new dict and save only the useful categories,
-        # as well as the cleaned, repeatless abc, and append it
-        # to the list
         tune = dict()
         cats = ["tune", "setting", "type", "meter", "mode"]
         for c in cats: tune[c] = t[c]
@@ -62,7 +59,7 @@ def create_dict_list(tunes, types=None, meters=None, modes=None):
         if tune['abc'] != '!!BAD ABC!!':
             cleaned.append(tune)
 
-    # Finally, sort the list for human readability.
+    print(len(cleaned))
     return cleaned
 
 

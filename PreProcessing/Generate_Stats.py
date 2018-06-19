@@ -1,5 +1,6 @@
 from datetime import datetime
 
+# TODO - Sort the data prior to printing
 total = 0
 unique = set()
 family = dict()

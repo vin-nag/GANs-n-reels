@@ -99,7 +99,6 @@ class TestCleaner(unittest.TestCase):
         def quick_test(test_str, correct='A|CB|DD|CB|EE|FG|BA|CD|FG|DC|BA|]'):
             self.assertEqual(correct, self.rr(test_str), test_str + ' unsuccessfully converted to ' + correct)
 
-        # TODO - Set up more tests, especially here.
         comp1 = "A|:CB|1DD:|2EE|||:FG|[1BA|CD:|[2DC|BA||"
         comp2 = "A|:CB|1DD:|2EE|:FG|[1BA|CD:|[2DC|BA||"
         comp3 = "A|:CB|1DD:|2EE||FG|[1BA|CD:|[2DC|BA||"
