@@ -2,14 +2,18 @@ from keras import layers
 from keras import optimizers
 from keras import models
 from keras.layers.advanced_activations import LeakyReLU
+import numpy as np
+import matplotlib as plt
+import pandas as pd
 
 class GAN():
-    def __init__(self, paddedData):
+    def __init__(self, paddedData, data):
         self.paddedData = paddedData
         self.img_dim = [4 + 1, 64 + (4 * 2)]  # RHS of sum is padding
         self.channels = 1
         self.img_shape = [*self.img_dim, self.channels]
         self.noise_shape = [100, ]
+        self.data = data
 
         self.gloss = []
         self.dloss = []
@@ -112,7 +116,7 @@ class GAN():
                     discriminator_loss[0],
                     100 * discriminator_loss[1],
                     generator_loss))
-                self.sample_images()
+                #self.sample_images()
 
         # self.plotLossHistory()
 
@@ -155,8 +159,8 @@ class GAN():
         generated_imgs = self.generator.predict(noise)[:, :-1, 4:-4]
         generated_imgs = 0.5 * generated_imgs + 0.5
 
-        random_real_indices = np.random.randint(0, data.shape[0], rows * columns)
-        real_imgs = data[random_real_indices]
+        random_real_indices = np.random.randint(0, self.data.shape[0], rows * columns)
+        real_imgs = self.data[random_real_indices]
 
         print("Real")
         fig, axs = plt.subplots(rows, columns)
