@@ -200,10 +200,7 @@ def remove_ties(abc):
 
 def remove_single_dual_repeat(abc, tune_id):
     """
-    Takes an abc string, and the tune_id for
-    error messages, then removes a single 1st/2nd
-    ending. If there are multiple repeats, it calls
-    another function to separate the string.
+    Takes a string with one 1st and 2nd ending, and removes it
     """
 
     # Split on the second ending, and check to make sure there are two parts.
@@ -249,55 +246,52 @@ def remove_dual_repeat(abc, tune_id):
     # If the number of 1st and 2nd endings are the same,
     # we can somewhat safely assume that the structure is sound
     if count1 == count2:
-        temp = abc.split(':|2')
-        end = temp.pop()
-        good_str = True
-        for x in temp: good_str = good_str and ('|1' in x)
+        # If a 2nd ending isn't paired with a first ending
+        for x in abc.split(':|2')[:-1]:
+            if '|1' not in x: return '!!BAD ABC - MISMATCH ENDS!!'
 
-        if good_str:
-            try:
-                for x in range(count1):
-                    loc1 = abc.index('|1') + 1
-                    loc2 = abc.index(':|2') + 2
-                    bars = 0
-                    fin = loc2
+        try:
+            for x in range(count1):
+                loc1 = abc.index('|1') + 1
+                loc2 = abc.index(':|2') + 2
+                bars = 0
+                fin = loc2
 
-                    # TODO - Simplify this using regex.
-                    # Count the groups of '|' in the ranges of the abc string
-                    # This approach does assume that the 1st and 2nd ending are
-                    # of the same bar length, though that's reasonable considering
-                    # the AABB format of most Irish music.
+                # TODO - Simplify this using regex.
+                # Count the groups of '|' in the ranges of the abc string
+                # This approach does assume that the 1st and 2nd ending are
+                # of the same bar length, though that's reasonable considering
+                # the AABB format of most Irish music.
 
-                    while loc1 < loc2:
-                        loc1 += 1
-                        if abc[loc1] != '|':
-                            continue
-                        else:
-                            while abc[loc1] == '|':
-                                loc1 += 1
-                            bars += 1
+                while loc1 < loc2:
+                    loc1 += 1
+                    if abc[loc1] != '|':
+                        continue
+                    else:
+                        while abc[loc1] == '|':
+                            loc1 += 1
+                        bars += 1
 
-                    while bars > 0:
-                        fin += 1
-                        if fin >= len(abc): break
-                        if abc[fin] != '|':
-                            continue
-                        else:
-                            while abc[fin] == '|':
-                                fin += 1
-                                if fin >= len(abc): break
-                            bars -= 1
+                while bars > 0:
+                    fin += 1
+                    if fin >= len(abc): break
+                    if abc[fin] != '|':
+                        continue
+                    else:
+                        while abc[fin] == '|':
+                            fin += 1
+                            if fin >= len(abc): break
+                        bars -= 1
 
-                    sub = abc[:fin-1]
-                    abc = abc[fin-1:]
-                    cleaned += remove_single_dual_repeat(sub, tune_id)
-            except ValueError:
-                return '!!BAD ABC!!'
-        else:
-            return '!!BAD ABC - MISMATCH ENDS!!'
+                sub = abc[:fin-1]
+                abc = abc[fin-1:]
+                cleaned += remove_single_dual_repeat(sub, tune_id)
+        except ValueError:
+            return '!!BAD ABC!!'
     # Otherwise, something is very wrong with the endings
     elif count1 > count2: return '!!BAD ABC - TOO MANY END1s!!'
     elif count2 > count1: return '!!BAD ABC - TOO MANY END2s!!'
+    else: return '!!BAD ABC - UNKNOWN ENDING!!'
     return cleaned
 
 
@@ -418,7 +412,7 @@ def check_time(abc):
         return '!!BAD ABC - INCORRECT BAR LENGTH!!'
     if s % 4 == 0:
         # There is an appropriate number of beats in the whole tune
-        abc = abc.replace('|', '')
+        pass
     else:
         if (s - count_bar(bars[0])) % 4 == 0:
             # The piece has the right number of beats, minus the pickup bar
@@ -447,7 +441,7 @@ def print_bad_abc(abc, tune_id, extra=list()):
     print()
 
 
-def clean(abc, tune_id):
+def clean(abc, tune_id='Test'):
     """
     :param abc: An abc string
     :param tune_id: The tune setting, which is used as the unique id

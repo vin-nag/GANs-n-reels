@@ -81,7 +81,8 @@ def dicts_to_file(cleaned, fname):
         f.write("\n}")
 
 
-def master_clean(py_out, stats_out=None, types=None, meters=None, modes=None, default_folder='../Tunes/'):
+def master_clean(py_out, stats_out=None, default_folder='../Tunes/',
+                 types=None, meters=None, modes=None):
     """
 
     :param py_out: Name of the file for the dict. Ex: 'Tunes.py'
