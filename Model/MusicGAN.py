@@ -4,7 +4,8 @@ from keras import models
 from keras.layers.advanced_activations import LeakyReLU
 
 class GAN():
-    def __init__(self):
+    def __init__(self, paddedData):
+        self.paddedData = paddedData
         self.img_dim = [4 + 1, 64 + (4 * 2)]  # RHS of sum is padding
         self.channels = 1
         self.img_shape = [*self.img_dim, self.channels]
@@ -88,7 +89,7 @@ class GAN():
         return models.Model(img, validity)
 
     def train(self, iterations, batch_size=60, sample_interval=750):
-        X_train = paddedData
+        X_train = self.paddedData
         halfMaxPitch = (80 + 53) // 2
         pitchRange = 80 - halfMaxPitch
         X_train = (X_train.astype(np.float32) - halfMaxPitch) / pitchRange
