@@ -3,9 +3,43 @@ import re
 MIN_BAR_LENGTH = 15
 GRAMMAR_CHARACTERS = "zabcdefgABCDEFG23468T-^=_,></'|"
 
+# region REGULAR EXPRESSION OBJECTS
+# region --- Grammar Cleaning
+APOSTROPHE_RE = re.compile('[’`´]')
+SEMICOLON_RE = re.compile(';')
+BARLINES_RE = re.compile('(\|]+)|(\[+\|)|(\|!\|)')
+REPEATS_RE = re.compile(':\|*:+')
+END_1_RE = re.compile('(\|*\[?1\.?)')
+END_2_RE = re.compile('(:?\|+\[?2\.?)|(:\|1)')
+QUIRK_1_RE = re.compile('--+')
+QUIRK_2_RE = re.compile(r'([<>])\1+')
+QUIRK_3_RE = re.compile('<>|><')
+# endregion --- Grammar Cleaning
+
+# region --- Ornamentation Cleaning
+COMMENTS_RE = re.compile('(!.{1,16}!)|(\+.{1,16}\+)|({[\^=_\w,\'/]+?\})|(".*?")')
+ORNAMNETS_RE = re.compile('[.~HLMOPSTuv*$J!]')
+FIND_TRIPLETS_RE = re.compile('\(3')
+TUPLES_RE = re.compile('\([\d]')
+SLURS_RE = re.compile('[()]')
+# endregion --- Ornamentation Cleaning
+
+# region --- Timing Cleaning
+SWUNG_NOTES_RE = re.compile(r'([_=^]*[a-gzA-G][,\']*)(/?[\d]?)([<>])([_=^]*[a-gzA-G][,\']*)\2')
+TIES_RE = re.compile('([_=^]*[a-gzA-G][,\']*)([\d]*/?[\d]*)-([_=^]*[a-gzA-G][,\']*)([\d]*/?[\d]*)')
+OLD_NOTE_RE = re.compile('([_=^]*[a-gzA-g][,\']*)(/?[\d]?)')
+REPLACE_TRIPLETS_RE = re.compile('T([_=^]*[a-gzA-g][,\']*/?[\d]?){3}')
+IMPLIED_HALF_LENGTH_RE = re.compile('([_=^]*[a-gzA-g][,\']*)/([^\d])')
+# endregion --- Timing Cleaning
+
+# region --- Fraction Handling
+ISOLATE_TIME_RE = re.compile('[_=^]*[a-gzA-G][,\']*([\d]*/?[\d]*)')
+FRACTIONAL_PARTS_RE = re.compile('([\d]*)/?([\d]*)')
+# endregion --- Fraction Handling
+# endregion REGULAR EXPRESSION OBJECTS
+
+
 # region CLEAN CHARACTERS
-
-
 def clean_grammar(abc):
     """
     Cleans the varying user input possibilities into a more
@@ -16,8 +50,8 @@ def clean_grammar(abc):
     abc = abc.replace("\x14", "")
 
     # Replaces mistyped repeats and apostrophes
-    abc = abc.replace(';', ':')
-    abc = re.sub('[’`´]', '\'', abc)
+    abc = SEMICOLON_RE.sub(':', abc)
+    abc = APOSTROPHE_RE.sub('\'', abc)
 
     # Handles extra data in the abc string
     if 'M:' in abc: return '!!BAD ABC - EXTRA TIME SIGNATURE!!'
@@ -25,19 +59,19 @@ def clean_grammar(abc):
         abc = abc[abc.index('|'):]
 
     # Replaces alternate barline notations
-    abc = re.sub('(\|]+)|(\[+\|)|(\|!\|)', '||', abc)
+    abc = BARLINES_RE.sub('||', abc)
 
     # Consolidates repeat grammar
     if abc[0] == ':': abc = '|' + abc
     if abc[-1] == ':': abc = abc + '|'
-    abc = re.sub(':\|*:+', ':||:', abc)
-    abc = re.sub('(\|*\[?1\.?)', '|1', abc)
-    abc = re.sub('(:?\|+\[?2\.?)|(:\|1)', ':|2', abc)
+    abc = REPEATS_RE.sub(':||:', abc)
+    abc = END_1_RE.sub('|1', abc)
+    abc = END_2_RE.sub(':|2', abc)
 
     # Fixes other grammatical quirks
-    abc = re.sub('--+', '-', abc)
-    abc = re.sub(r'([<>])\1+', r'\1', abc)
-    abc = re.sub('<>|><', '', abc)
+    abc = QUIRK_1_RE.sub('-', abc)
+    abc = QUIRK_2_RE.sub(r'\1', abc)
+    abc = QUIRK_3_RE.sub('', abc)
 
     return abc
 
@@ -73,27 +107,25 @@ def remove_ornaments(abc):
     """
 
     # Removes any of the instructions between '!' and the old '+', grace notes and comments
-    abc = re.sub('(!.{1,16}!)|(\+.{1,16}\+)|(\{[\^=_\w,\'/]+?\})|(".*?")', '', abc)
-    abc = re.sub('[\.~HLMOPSTuv\*\$J!]', '', abc)
+    abc = COMMENTS_RE.sub('', abc)
+    abc = ORNAMNETS_RE.sub('', abc)
 
     # Preserve triplets, swap out any other length modifiers, then nuke parenthesis
-    abc = re.sub('\(3', 'T', abc)
-    abc = re.sub('\([\d]', 'X', abc)
-    abc = re.sub('[()]', '', abc)
+    abc = FIND_TRIPLETS_RE.sub('T', abc)
+    abc = TUPLES_RE.sub('X', abc)
+    abc = SLURS_RE.sub('', abc)
 
     return abc
-# endregion
+# endregion CLEAN CHARACTERS
 
 
 # region NOTE LENGTHS
-
-
 def merge_note_lengths(a, b):
     """
     Takes two note lengths parts and returns a string of their sum
     """
-    a = re.findall('([\d]*)/?([\d]*)', a)[0]
-    b = re.findall('([\d]*)/?([\d]*)', b)[0]
+    a = FRACTIONAL_PARTS_RE.findall(a)[0]
+    b = FRACTIONAL_PARTS_RE.findall(b)[0]
     num, den = simplify_fractions(a, b)
     if num == 1 and den == 1:
         return ''
@@ -136,7 +168,7 @@ def simplify_fractions(a, b):
 def remove_swing_notes(abc):
 
     def remove_swing_helper(x):
-        a = re.findall('([\d]*)/?([\d]*)', x.group(2))[0]
+        a = FRACTIONAL_PARTS_RE.findall(x.group(2))[0]
         num = int(a[0]) if a[0] != '' else 1
         den = int(a[1]) if a[1] != '' else 1
         half = str(num) + '/' + str(den*2)
@@ -147,7 +179,7 @@ def remove_swing_notes(abc):
         else: return x.group(1) + short + x.group(4) + long
 
     # This matches all the equal length swing time notes
-    abc = re.sub(r'([_=^]*[a-gzA-G][,\']*)(/?[\d]?)([<>])([_=^]*[a-gzA-G][,\']*)\2', remove_swing_helper, abc)
+    abc = SWUNG_NOTES_RE.sub(remove_swing_helper, abc)
     if '>' in abc or '<' in abc: return '!!BAD ABC - SWING NOT REMOVED!!'
     return abc
 
@@ -156,7 +188,7 @@ def remove_triplets(abc):
 
     def remove_triplets_helper(m):
         s = m.group()
-        x = re.findall('([_=^]*[a-gzA-g][,\']*)(/?[\d]?)', s[1:])
+        x = OLD_NOTE_RE.findall(s[1:])
         abc = ''
         # For all the notes in x, use the current length to determine the new length
         for i in x:
@@ -171,7 +203,7 @@ def remove_triplets(abc):
 
     # This matches all the equal length triplets, then removes grammatically incorrect strings
     if '/3' in abc: return '!!BAD ABC - INVALID TRIPLET (/3)!!'
-    abc = re.sub('T([_=^]*[a-gzA-g][,\']*/?[\d]?){3}', remove_triplets_helper, abc)
+    abc = REPLACE_TRIPLETS_RE.sub(remove_triplets_helper, abc)
     if 'T' in abc: return '!!BAD ABC - TRIPLET NOT REMOVED!!'
     return abc
 
@@ -187,17 +219,15 @@ def remove_ties(abc):
             return m.group(1) + merge_note_lengths(m.group(2), m.group(4))
 
     # TODO - Replace with a single re.sub call
-    abc = re.sub('([_=^]*[a-gzA-G][,\']*)([\d]*/?[\d]*)-([_=^]*[a-gzA-G][,\']*)([\d]*/?[\d]*)', condense_ties, abc)
-    abc = re.sub('([_=^]*[a-gzA-G][,\']*)([\d]*/?[\d]*)-([_=^]*[a-gzA-G][,\']*)([\d]*/?[\d]*)', condense_ties, abc)
-    abc = re.sub('([_=^]*[a-gzA-G][,\']*)([\d]*/?[\d]*)-([_=^]*[a-gzA-G][,\']*)([\d]*/?[\d]*)', condense_ties, abc)
+    abc = TIES_RE.sub(condense_ties, abc)
+    abc = TIES_RE.sub(condense_ties, abc)
+    abc = TIES_RE.sub(condense_ties, abc)
 
     return abc
-# endregion
+# endregion NOTE LENGTHS
 
 
 # region REMOVE REPEATS
-
-
 def remove_single_dual_repeat(abc, tune_id):
     """
     Takes a string with one 1st and 2nd ending, and removes it
@@ -325,12 +355,10 @@ def remove_simple_repeats(abc, tune_id):
             else: cleaned += x + '|' + x + '|'
 
     return cleaned
-# endregion
+# endregion REMOVE REPEATS
 
 
 # region MAIN
-
-
 def remove_repeats(abc, tune_id):
     """
     :param abc: A spaceless abc string
@@ -382,8 +410,8 @@ def clean_note_lengths(abc):
     # Makes implicit not lengths explicit
     abc = abc.replace('//', '/4')
     # TODO - Replace with a single re.sub call
-    abc = re.sub('([_=^]*[a-gzA-g][,\']*)/([^\d/])', r'\1/2\2', abc)
-    abc = re.sub('([_=^]*[a-gzA-g][,\']*)/([^\d/])', r'\1/2\2', abc)
+    abc = IMPLIED_HALF_LENGTH_RE.sub(r'\1/2\2', abc)
+    abc = IMPLIED_HALF_LENGTH_RE.sub(r'\1/2\2', abc)
 
     abc = remove_swing_notes(abc)
     abc = remove_triplets(abc)
@@ -459,4 +487,4 @@ def clean(abc, tune_id='Test'):
         # print_bad_abc(abc, tune_id)
         return '!!BAD ABC!!'
     return cleaned
-# endregion
+# endregion MAIN
