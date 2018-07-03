@@ -1,6 +1,6 @@
 import re
 
-MIN_BAR_LENGTH = 15
+MIN_BARS = 15
 GRAMMAR_CHARACTERS = "zabcdefgABCDEFG23468T-^=_,></'|"
 
 # region REGULAR EXPRESSION OBJECTS
@@ -36,6 +36,9 @@ IMPLIED_HALF_LENGTH_RE = re.compile('([_=^]*[a-gzA-g][,\']*)/([^\d])')
 ISOLATE_TIME_RE = re.compile('[_=^]*[a-gzA-G][,\']*([\d]*/?[\d]*)')
 FRACTIONAL_PARTS_RE = re.compile('([\d]*)/?([\d]*)')
 # endregion --- Fraction Handling
+
+HANDLE_ACCIDENTALS_RE = re.compile('[_=^]+[a-gzA-G][,\']*')
+
 # endregion REGULAR EXPRESSION OBJECTS
 
 
@@ -165,6 +168,18 @@ def simplify_fractions(a, b):
     return num, den
 
 
+def count_bar(bar):
+    time = re.findall('[_=^]*[a-gzA-G][,\']*([\d]*/?[\d]*)', bar)
+
+    num_sum = 0
+    den_sum = 1
+    for x in time:
+        a = re.findall('([\d]*)/?([\d]*)', x)[0]
+        num_sum, den_sum = simplify_fractions(a, (num_sum, den_sum))
+
+    return num_sum / den_sum
+
+
 def remove_swing_notes(abc):
 
     def remove_swing_helper(x):
@@ -228,6 +243,32 @@ def remove_ties(abc):
 
 
 # region REMOVE REPEATS
+def repair_bars(abc):
+    """
+    Takes an abc string, and merges pickups and bars which are too short.
+    """
+
+    # Split into individual bars, remove the first and last bar
+    # as these could be pickup related, and non-standard length
+    bars = abc.split('|')
+    if len(bars) < 3: return abc
+    end = bars.pop()
+    if end == '': end = bars.pop()
+    cleaned = bars.pop(0) + '|'
+    x = 0
+    while x < len(bars):
+        bar = bars[x]
+        s = count_bar(bar)
+        if s % BEATS_PER_BAR != 0 and x < len(bars)-1 and (s + count_bar(bars[x+1])) % BEATS_PER_BAR == 0:
+            cleaned += bar + bars[x+1] + '|'
+            x += 1
+        else:
+            cleaned += bar + '|'
+        x += 1
+    cleaned += end + '|'
+    return cleaned
+
+
 def remove_single_dual_repeat(abc, tune_id):
     """
     Takes a string with one 1st and 2nd ending, and removes it
@@ -358,6 +399,37 @@ def remove_simple_repeats(abc, tune_id):
 # endregion REMOVE REPEATS
 
 
+def parse_accidentals(abc):
+    cleaned = ''
+    bars = abc.split('|')
+    for bar in bars:
+        accidentals = HANDLE_ACCIDENTALS_RE.findall(bar)
+
+        # There are no accidentals, add the bar and continue
+        if len(accidentals) == 0:
+            cleaned = bar + '|'
+
+        # Pass over bars which have a single accidental, that comes after all other notes of the same pitch
+        elif len(accidentals) == 1 and bar.count(accidentals[0][1:], bar.index(accidentals[0])+len(accidentals[0])) == 0:
+            cleaned = bar + '|'
+
+        # If the number of target pitches is the same as the number of accidentals, all of the relevant notes
+        # already have accidentals, so the bar is skipped.
+        elif sum([bar.count(i) for i in set(accidentals)]) == sum([bar.count(i) for i in set([j[1:] for j in accidentals])]):
+            cleaned = bar + '|'
+
+        elif len(accidentals) == 1:
+            acc = accidentals[0]
+            piv = bar.index(acc) + len(acc)
+            cleaned = bar[:piv] + bar[piv:].replace(acc[1:], acc)
+
+        else:
+            # TODO - Handle more complex accidental structures appropriately.
+            return '!!BAD ABC - TEMPORARY ACCIDENTAL REMOVAL!!'
+
+    return cleaned
+
+
 # region MAIN
 def remove_repeats(abc, tune_id):
     """
@@ -376,10 +448,13 @@ def remove_repeats(abc, tune_id):
     else:
         cleaned = abc
 
-    # Finally, normalize the barline grammar, for future checking
+    # Normalize the barline grammar, for future processing
     while ']' in cleaned: cleaned = cleaned.replace(']', '|')
     while '||' in cleaned: cleaned = cleaned.replace('||', '|')
     if cleaned[0] == '|': cleaned = cleaned[1:]
+
+    # Condense bars which were improperly split
+    cleaned = repair_bars(cleaned)
 
     return cleaned
 
@@ -390,10 +465,10 @@ def remove_bad_tunes(abc):
     """
 
     # Removes any songs less than X+1 bars long.
-    if abc.count('|') < MIN_BAR_LENGTH:
+    if abc.count('|') < MIN_BARS:
         return '!!BAD ABC - SHORT PIECE'
 
-    # Removes and song which has characters not contained in the defined grammar
+    # Removes any song which has characters not contained in the defined grammar
     chars = set(x for x in GRAMMAR_CHARACTERS)
     tune = set(x for x in abc)
     if len(tune - chars) != 0:
@@ -420,30 +495,20 @@ def clean_note_lengths(abc):
 
 
 def check_time(abc):
-
-    def count_bar(bar):
-        time = re.findall('[_=^]*[a-gzA-G][,\']*([\d]*/?[\d]*)', bar)
-
-        num_sum = 0
-        den_sum = 1
-        for x in time:
-            a = re.findall('([\d]*)/?([\d]*)', x)[0]
-            num_sum, den_sum = simplify_fractions(a, (num_sum, den_sum))
-
-        return num_sum / den_sum
-
     bars = abc.split('|')
     s = 0
     try:
         for bar in bars: s += count_bar(bar)
     except ValueError:
         return '!!BAD ABC - INCORRECT BAR LENGTH!!'
-    if s % 4 == 0:
+    if s % BEATS_PER_BAR == 0:
         # There is an appropriate number of beats in the whole tune
         pass
+        # abc = '!!BAD ABC - INCORRECT BAR LENGTH!!'
     else:
-        if (s - count_bar(bars[0])) % 4 == 0:
+        if (s - count_bar(bars[0])) % BEATS_PER_BAR == 0:
             # The piece has the right number of beats, minus the pickup bar
+            # pass
             abc = '!!BAD ABC - INCORRECT BAR LENGTH!!'
         else:
             # There is a non-standard number of beats somwhere other than the pickup
@@ -475,12 +540,20 @@ def clean(abc, tune_id='Test'):
     :param tune_id: The tune setting, which is used as the unique id
     :return: Either '!!BAD ABC!!' or a valid abc string
     """
+    global BEATS_PER_BAR, BEAT_SUBDIVISIONS
+    # TODO - Base this on time signature
+    BEATS_PER_BAR = 4
+
+    # TODO - Base this on the most frequent sum of notes in a bar
+    BEAT_SUBDIVISIONS = 1
+
     abc = clean_grammar(abc)
     abc = remove_ornaments(abc)
     cleaned = remove_repeats(abc, tune_id)
     cleaned = remove_bad_tunes(cleaned)
     cleaned = clean_note_lengths(cleaned)
     cleaned = check_time(cleaned)
+    cleaned = parse_accidentals(cleaned)
     if '-' in cleaned: cleaned = remove_ties(cleaned)
 
     if '!!BAD ABC' in cleaned:
