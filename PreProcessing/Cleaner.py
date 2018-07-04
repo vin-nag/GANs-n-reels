@@ -407,21 +407,21 @@ def parse_accidentals(abc):
 
         # There are no accidentals, add the bar and continue
         if len(accidentals) == 0:
-            cleaned = bar + '|'
+            cleaned += bar + '|'
 
         # Pass over bars which have a single accidental, that comes after all other notes of the same pitch
         elif len(accidentals) == 1 and bar.count(accidentals[0][1:], bar.index(accidentals[0])+len(accidentals[0])) == 0:
-            cleaned = bar + '|'
+            cleaned += bar + '|'
 
         # If the number of target pitches is the same as the number of accidentals, all of the relevant notes
         # already have accidentals, so the bar is skipped.
         elif sum([bar.count(i) for i in set(accidentals)]) == sum([bar.count(i) for i in set([j[1:] for j in accidentals])]):
-            cleaned = bar + '|'
+            cleaned += bar + '|'
 
         elif len(accidentals) == 1:
             acc = accidentals[0]
             piv = bar.index(acc) + len(acc)
-            cleaned = bar[:piv] + bar[piv:].replace(acc[1:], acc)
+            cleaned += bar[:piv] + bar[piv:].replace(acc[1:], acc) + '|'
 
         else:
             # TODO - Handle more complex accidental structures appropriately.
