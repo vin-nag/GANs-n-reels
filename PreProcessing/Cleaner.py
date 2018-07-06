@@ -169,12 +169,12 @@ def simplify_fractions(a, b):
 
 
 def count_bar(bar):
-    time = re.findall('[_=^]*[a-gzA-G][,\']*([\d]*/?[\d]*)', bar)
+    time = ISOLATE_TIME_RE.findall(bar)
 
     num_sum = 0
     den_sum = 1
     for x in time:
-        a = re.findall('([\d]*)/?([\d]*)', x)[0]
+        a = FRACTIONAL_PARTS_RE.findall(x)[0]
         num_sum, den_sum = simplify_fractions(a, (num_sum, den_sum))
 
     return num_sum / den_sum
