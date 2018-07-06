@@ -1,11 +1,49 @@
 import re
 
-MIN_BAR_LENGTH = 15
+MIN_BARS = 15
 GRAMMAR_CHARACTERS = "zabcdefgABCDEFG23468T-^=_,></'|"
 
+# region REGULAR EXPRESSION OBJECTS
+# region --- Grammar Cleaning
+APOSTROPHE_RE = re.compile('[’`´]')
+SEMICOLON_RE = re.compile(';')
+BARLINES_RE = re.compile('(\|]+)|(\[+\|)|(\|!\|)')
+REPEATS_RE = re.compile(':\|*:+')
+END_1_RE = re.compile('(\|*\[?1\.?)')
+END_2_RE = re.compile('(:?\|+\[?2\.?)|(:\|1)')
+QUIRK_1_RE = re.compile('--+')
+QUIRK_2_RE = re.compile(r'([<>])\1+')
+QUIRK_3_RE = re.compile('<>|><')
+# endregion --- Grammar Cleaning
+
+# region --- Ornamentation Cleaning
+COMMENTS_RE = re.compile('(!.{1,16}!)|(\+.{1,16}\+)|({[\^=_\w,\'/]+?\})|(".*?")')
+ORNAMNETS_RE = re.compile('[.~HLMOPSTuv*$J!]')
+FIND_TRIPLETS_RE = re.compile('\(3')
+TUPLES_RE = re.compile('\([\d]')
+SLURS_RE = re.compile('[()]')
+# endregion --- Ornamentation Cleaning
+
+# region --- Timing Cleaning
+SWUNG_NOTES_RE = re.compile(r'([_=^]*[a-gzA-G][,\']*)(/?[\d]?)([<>])([_=^]*[a-gzA-G][,\']*)\2')
+TIES_RE = re.compile('([_=^]*[a-gzA-G][,\']*)([\d]*/?[\d]*)-([_=^]*[a-gzA-G][,\']*)([\d]*/?[\d]*)')
+OLD_NOTE_RE = re.compile('([_=^]*[a-gzA-g][,\']*)(/?[\d]?)')
+REPLACE_TRIPLETS_RE = re.compile('T([_=^]*[a-gzA-g][,\']*/?[\d]?){3}')
+IMPLIED_HALF_LENGTH_RE = re.compile('([_=^]*[a-gzA-g][,\']*)/([^\d])')
+# endregion --- Timing Cleaning
+
+# region --- Fraction Handling
+ISOLATE_TIME_RE = re.compile('[_=^]*[a-gzA-G][,\']*([\d]*/?[\d]*)')
+FRACTIONAL_PARTS_RE = re.compile('([\d]*)/?([\d]*)')
+# endregion --- Fraction Handling
+
+HANDLE_ACCIDENTALS_RE = re.compile('[_=^]+[a-gzA-G][,\']*')
+
+
+# endregion REGULAR EXPRESSION OBJECTS
+
+
 # region CLEAN CHARACTERS
-
-
 def clean_grammar(abc):
     """
     Cleans the varying user input possibilities into a more
@@ -16,8 +54,8 @@ def clean_grammar(abc):
     abc = abc.replace("\x14", "")
 
     # Replaces mistyped repeats and apostrophes
-    abc = abc.replace(';', ':')
-    abc = re.sub('[’`´]', '\'', abc)
+    abc = SEMICOLON_RE.sub(':', abc)
+    abc = APOSTROPHE_RE.sub('\'', abc)
 
     # Handles extra data in the abc string
     if 'M:' in abc: return '!!BAD ABC - EXTRA TIME SIGNATURE!!'
@@ -25,19 +63,19 @@ def clean_grammar(abc):
         abc = abc[abc.index('|'):]
 
     # Replaces alternate barline notations
-    abc = re.sub('(\|]+)|(\[+\|)|(\|!\|)', '||', abc)
+    abc = BARLINES_RE.sub('||', abc)
 
     # Consolidates repeat grammar
     if abc[0] == ':': abc = '|' + abc
     if abc[-1] == ':': abc = abc + '|'
-    abc = re.sub(':\|*:+', ':||:', abc)
-    abc = re.sub('(\|*\[?1\.?)', '|1', abc)
-    abc = re.sub('(:?\|+\[?2\.?)|(:\|1)', ':|2', abc)
+    abc = REPEATS_RE.sub(':||:', abc)
+    abc = END_1_RE.sub('|1', abc)
+    abc = END_2_RE.sub(':|2', abc)
 
     # Fixes other grammatical quirks
-    abc = re.sub('--+', '-', abc)
-    abc = re.sub(r'([<>])\1+', r'\1', abc)
-    abc = re.sub('<>|><', '', abc)
+    abc = QUIRK_1_RE.sub('-', abc)
+    abc = QUIRK_2_RE.sub(r'\1', abc)
+    abc = QUIRK_3_RE.sub('', abc)
 
     return abc
 
@@ -65,7 +103,7 @@ def remove_ornaments(abc):
         *            ???
         $            ???
         J            ???
-        
+
         !***!        Comment or direction
         +***+        Comment or direction
         {***}        Grace note(s)
@@ -73,27 +111,27 @@ def remove_ornaments(abc):
     """
 
     # Removes any of the instructions between '!' and the old '+', grace notes and comments
-    abc = re.sub('(!.{1,16}!)|(\+.{1,16}\+)|(\{[\^=_\w,\'/]+?\})|(".*?")', '', abc)
-    abc = re.sub('[\.~HLMOPSTuv\*\$J!]', '', abc)
+    abc = COMMENTS_RE.sub('', abc)
+    abc = ORNAMNETS_RE.sub('', abc)
 
     # Preserve triplets, swap out any other length modifiers, then nuke parenthesis
-    abc = re.sub('\(3', 'T', abc)
-    abc = re.sub('\([\d]', 'X', abc)
-    abc = re.sub('[()]', '', abc)
+    abc = FIND_TRIPLETS_RE.sub('T', abc)
+    abc = TUPLES_RE.sub('X', abc)
+    abc = SLURS_RE.sub('', abc)
 
     return abc
-# endregion
+
+
+# endregion CLEAN CHARACTERS
 
 
 # region NOTE LENGTHS
-
-
 def merge_note_lengths(a, b):
     """
     Takes two note lengths parts and returns a string of their sum
     """
-    a = re.findall('([\d]*)/?([\d]*)', a)[0]
-    b = re.findall('([\d]*)/?([\d]*)', b)[0]
+    a = FRACTIONAL_PARTS_RE.findall(a)[0]
+    b = FRACTIONAL_PARTS_RE.findall(b)[0]
     num, den = simplify_fractions(a, b)
     if num == 1 and den == 1:
         return ''
@@ -133,51 +171,69 @@ def simplify_fractions(a, b):
     return num, den
 
 
-def remove_swing_notes(abc):
+def count_bar(bar):
+    time = ISOLATE_TIME_RE.findall(bar)
 
+    num_sum = 0
+    den_sum = 1
+    for x in time:
+        a = FRACTIONAL_PARTS_RE.findall(x)[0]
+        num_sum, den_sum = simplify_fractions(a, (num_sum, den_sum))
+
+    return num_sum / den_sum
+
+
+def remove_swing_notes(abc):
     def remove_swing_helper(x):
-        a = re.findall('([\d]*)/?([\d]*)', x.group(2))[0]
+        a = FRACTIONAL_PARTS_RE.findall(x.group(2))[0]
         num = int(a[0]) if a[0] != '' else 1
         den = int(a[1]) if a[1] != '' else 1
-        half = str(num) + '/' + str(den*2)
+        half = str(num) + '/' + str(den * 2)
         short = merge_note_lengths(half, '0/1')
         long = merge_note_lengths(half, x.group(2))
 
-        if x.group(3) == '>': return x.group(1) + long + x.group(4) + short
-        else: return x.group(1) + short + x.group(4) + long
+        if x.group(3) == '>':
+            return x.group(1) + long + x.group(4) + short
+        else:
+            return x.group(1) + short + x.group(4) + long
 
     # This matches all the equal length swing time notes
-    abc = re.sub(r'([_=^]*[a-gzA-G][,\']*)(/?[\d]?)([<>])([_=^]*[a-gzA-G][,\']*)\2', remove_swing_helper, abc)
+    abc = SWUNG_NOTES_RE.sub(remove_swing_helper, abc)
     if '>' in abc or '<' in abc: return '!!BAD ABC - SWING NOT REMOVED!!'
     return abc
 
 
 def remove_triplets(abc):
-
     def remove_triplets_helper(m):
         s = m.group()
-        x = re.findall('([_=^]*[a-gzA-g][,\']*)(/?[\d]?)', s[1:])
+        x = OLD_NOTE_RE.findall(s[1:])
         abc = ''
         # For all the notes in x, use the current length to determine the new length
         for i in x:
-            if   i[1] == '/4':  abc += i[0] + '/6'
-            elif i[1] == '/2':  abc += i[0] + '/3'
-            elif i[1] == '':    abc += i[0] + '2/3'
-            elif i[1] == '2':   abc += i[0] + '4/3'
-            elif i[1] == '3':   abc += i[0]
-            elif i[1] == '4':   abc += i[0] + '8/3'
-            else:               return '!!BAD ABC - TRIPLET TOO SMALL!!'
+            if i[1] == '/4':
+                abc += i[0] + '/6'
+            elif i[1] == '/2':
+                abc += i[0] + '/3'
+            elif i[1] == '':
+                abc += i[0] + '2/3'
+            elif i[1] == '2':
+                abc += i[0] + '4/3'
+            elif i[1] == '3':
+                abc += i[0]
+            elif i[1] == '4':
+                abc += i[0] + '8/3'
+            else:
+                return '!!BAD ABC - TRIPLET TOO SMALL!!'
         return abc
 
     # This matches all the equal length triplets, then removes grammatically incorrect strings
     if '/3' in abc: return '!!BAD ABC - INVALID TRIPLET (/3)!!'
-    abc = re.sub('T([_=^]*[a-gzA-g][,\']*/?[\d]?){3}', remove_triplets_helper, abc)
+    abc = REPLACE_TRIPLETS_RE.sub(remove_triplets_helper, abc)
     if 'T' in abc: return '!!BAD ABC - TRIPLET NOT REMOVED!!'
     return abc
 
 
 def remove_ties(abc):
-
     def condense_ties(m):
         if m.group(1) != m.group(3):
             # Pitches are different. Remove '-'
@@ -187,15 +243,41 @@ def remove_ties(abc):
             return m.group(1) + merge_note_lengths(m.group(2), m.group(4))
 
     # TODO - Replace with a single re.sub call
-    abc = re.sub('([_=^]*[a-gzA-G][,\']*)([\d]*/?[\d]*)-([_=^]*[a-gzA-G][,\']*)([\d]*/?[\d]*)', condense_ties, abc)
-    abc = re.sub('([_=^]*[a-gzA-G][,\']*)([\d]*/?[\d]*)-([_=^]*[a-gzA-G][,\']*)([\d]*/?[\d]*)', condense_ties, abc)
-    abc = re.sub('([_=^]*[a-gzA-G][,\']*)([\d]*/?[\d]*)-([_=^]*[a-gzA-G][,\']*)([\d]*/?[\d]*)', condense_ties, abc)
+    abc = TIES_RE.sub(condense_ties, abc)
+    abc = TIES_RE.sub(condense_ties, abc)
+    abc = TIES_RE.sub(condense_ties, abc)
 
     return abc
-# endregion
+
+
+# endregion NOTE LENGTHS
 
 
 # region REMOVE REPEATS
+def repair_bars(abc):
+    """
+    Takes an abc string, and merges pickups and bars which are too short.
+    """
+
+    # Split into individual bars, remove the first and last bar
+    # as these could be pickup related, and non-standard length
+    bars = abc.split('|')
+    if len(bars) < 3: return abc
+    end = bars.pop()
+    if end == '': end = bars.pop()
+    cleaned = bars.pop(0) + '|'
+    x = 0
+    while x < len(bars):
+        bar = bars[x]
+        s = count_bar(bar)
+        if s % BEATS_PER_BAR != 0 and x < len(bars) - 1 and (s + count_bar(bars[x + 1])) % BEATS_PER_BAR == 0:
+            cleaned += bar + bars[x + 1] + '|'
+            x += 1
+        else:
+            cleaned += bar + '|'
+        x += 1
+    cleaned += end + '|'
+    return cleaned
 
 
 def remove_single_dual_repeat(abc, tune_id):
@@ -236,8 +318,10 @@ def remove_dual_repeat(abc, tune_id):
 
     # If the string is empty, do nothing. If the string starts with 1 or :,
     # it is effectively un-salvageable.
-    if len(abc) == 0: return ''
-    elif abc[0] == '1' or abc[0] == ':': return '!!BAD ABC - MALFORM STRING!!'
+    if len(abc) == 0:
+        return ''
+    elif abc[0] == '1' or abc[0] == ':':
+        return '!!BAD ABC - MALFORM STRING!!'
 
     cleaned = ''
     count1 = abc.count('|1')
@@ -283,15 +367,18 @@ def remove_dual_repeat(abc, tune_id):
                             if fin >= len(abc): break
                         bars -= 1
 
-                sub = abc[:fin-1]
-                abc = abc[fin-1:]
+                sub = abc[:fin - 1]
+                abc = abc[fin - 1:]
                 cleaned += remove_single_dual_repeat(sub, tune_id)
         except ValueError:
             return '!!BAD ABC!!'
     # Otherwise, something is very wrong with the endings
-    elif count1 > count2: return '!!BAD ABC - TOO MANY END1s!!'
-    elif count2 > count1: return '!!BAD ABC - TOO MANY END2s!!'
-    else: return '!!BAD ABC - UNKNOWN ENDING!!'
+    elif count1 > count2:
+        return '!!BAD ABC - TOO MANY END1s!!'
+    elif count2 > count1:
+        return '!!BAD ABC - TOO MANY END2s!!'
+    else:
+        return '!!BAD ABC - UNKNOWN ENDING!!'
     return cleaned
 
 
@@ -310,27 +397,66 @@ def remove_simple_repeats(abc, tune_id):
         if '|:' in end: end = remove_simple_repeats(end, tune_id)
         for x in temp:
             # Process the chunk if it has the other repeat, otherwise double it
-            if '|:' in x: cleaned += remove_simple_repeats(x, tune_id) + '|'
-            else: cleaned += x + '|' + x + '|'
+            if '|:' in x:
+                cleaned += remove_simple_repeats(x, tune_id) + '|'
+            else:
+                cleaned += x + '|' + x + '|'
         cleaned += end + '|'
 
     # Follows the above logic, just in reverse
     elif abc.count(':|') <= abc.count('|:'):
         temp = abc.split('|:')
         beg = temp.pop(0)
-        if ':|' in beg: cleaned = remove_simple_repeats(beg, tune_id)
-        else: cleaned = beg + '|'
+        if ':|' in beg:
+            cleaned = remove_simple_repeats(beg, tune_id)
+        else:
+            cleaned = beg + '|'
         for x in temp:
-            if ':|' in x: cleaned += remove_simple_repeats(x, tune_id)
-            else: cleaned += x + '|' + x + '|'
+            if ':|' in x:
+                cleaned += remove_simple_repeats(x, tune_id)
+            else:
+                cleaned += x + '|' + x + '|'
 
     return cleaned
-# endregion
+
+
+# endregion REMOVE REPEATS
+
+
+def parse_accidentals(abc):
+    cleaned = ''
+    bars = abc.split('|')
+    for bar in bars:
+        accidentals = HANDLE_ACCIDENTALS_RE.findall(bar)
+
+        # There are no accidentals, add the bar and continue
+        if len(accidentals) == 0:
+            cleaned += bar + '|'
+
+        # Pass over bars which have a single accidental, that comes after all other notes of the same pitch
+        elif len(accidentals) == 1 and bar.count(accidentals[0][1:],
+                                                 bar.index(accidentals[0]) + len(accidentals[0])) == 0:
+            cleaned += bar + '|'
+
+        # If the number of target pitches is the same as the number of accidentals, all of the relevant notes
+        # already have accidentals, so the bar is skipped.
+        elif sum([bar.count(i) for i in set(accidentals)]) == sum(
+                [bar.count(i) for i in set([j[1:] for j in accidentals])]):
+            cleaned += bar + '|'
+
+        elif len(accidentals) == 1:
+            acc = accidentals[0]
+            piv = bar.index(acc) + len(acc)
+            cleaned += bar[:piv] + bar[piv:].replace(acc[1:], acc) + '|'
+
+        else:
+            # TODO - Handle more complex accidental structures appropriately.
+            return '!!BAD ABC - TEMPORARY ACCIDENTAL REMOVAL!!'
+
+    return cleaned
 
 
 # region MAIN
-
-
 def remove_repeats(abc, tune_id):
     """
     :param abc: A spaceless abc string
@@ -348,10 +474,13 @@ def remove_repeats(abc, tune_id):
     else:
         cleaned = abc
 
-    # Finally, normalize the barline grammar, for future checking
+    # Normalize the barline grammar, for future processing
     while ']' in cleaned: cleaned = cleaned.replace(']', '|')
     while '||' in cleaned: cleaned = cleaned.replace('||', '|')
     if cleaned[0] == '|': cleaned = cleaned[1:]
+
+    # Condense bars which were improperly split
+    cleaned = repair_bars(cleaned)
 
     return cleaned
 
@@ -362,10 +491,10 @@ def remove_bad_tunes(abc):
     """
 
     # Removes any songs less than X+1 bars long.
-    if abc.count('|') < MIN_BAR_LENGTH:
+    if abc.count('|') < MIN_BARS:
         return '!!BAD ABC - SHORT PIECE'
 
-    # Removes and song which has characters not contained in the defined grammar
+    # Removes any song which has characters not contained in the defined grammar
     chars = set(x for x in GRAMMAR_CHARACTERS)
     tune = set(x for x in abc)
     if len(tune - chars) != 0:
@@ -382,8 +511,8 @@ def clean_note_lengths(abc):
     # Makes implicit not lengths explicit
     abc = abc.replace('//', '/4')
     # TODO - Replace with a single re.sub call
-    abc = re.sub('([_=^]*[a-gzA-g][,\']*)/([^\d/])', r'\1/2\2', abc)
-    abc = re.sub('([_=^]*[a-gzA-g][,\']*)/([^\d/])', r'\1/2\2', abc)
+    abc = IMPLIED_HALF_LENGTH_RE.sub(r'\1/2\2', abc)
+    abc = IMPLIED_HALF_LENGTH_RE.sub(r'\1/2\2', abc)
 
     abc = remove_swing_notes(abc)
     abc = remove_triplets(abc)
@@ -392,30 +521,20 @@ def clean_note_lengths(abc):
 
 
 def check_time(abc):
-
-    def count_bar(bar):
-        time = re.findall('[_=^]*[a-gzA-G][,\']*([\d]*/?[\d]*)', bar)
-
-        num_sum = 0
-        den_sum = 1
-        for x in time:
-            a = re.findall('([\d]*)/?([\d]*)', x)[0]
-            num_sum, den_sum = simplify_fractions(a, (num_sum, den_sum))
-
-        return num_sum / den_sum
-
     bars = abc.split('|')
     s = 0
     try:
         for bar in bars: s += count_bar(bar)
     except ValueError:
         return '!!BAD ABC - INCORRECT BAR LENGTH!!'
-    if s % 4 == 0:
+    if s % BEATS_PER_BAR == 0:
         # There is an appropriate number of beats in the whole tune
         pass
+        # abc = '!!BAD ABC - INCORRECT BAR LENGTH!!'
     else:
-        if (s - count_bar(bars[0])) % 4 == 0:
+        if (s - count_bar(bars[0])) % BEATS_PER_BAR == 0:
             # The piece has the right number of beats, minus the pickup bar
+            # pass
             abc = '!!BAD ABC - INCORRECT BAR LENGTH!!'
         else:
             # There is a non-standard number of beats somwhere other than the pickup
@@ -447,16 +566,24 @@ def clean(abc, tune_id='Test'):
     :param tune_id: The tune setting, which is used as the unique id
     :return: Either '!!BAD ABC!!' or a valid abc string
     """
+    global BEATS_PER_BAR, BEAT_SUBDIVISIONS
+    # TODO - Base this on time signature
+    BEATS_PER_BAR = 4
+
+    # TODO - Base this on the most frequent sum of notes in a bar
+    BEAT_SUBDIVISIONS = 1
+
     abc = clean_grammar(abc)
     abc = remove_ornaments(abc)
     cleaned = remove_repeats(abc, tune_id)
     cleaned = remove_bad_tunes(cleaned)
     cleaned = clean_note_lengths(cleaned)
     cleaned = check_time(cleaned)
+    cleaned = parse_accidentals(cleaned)
     if '-' in cleaned: cleaned = remove_ties(cleaned)
 
     if '!!BAD ABC' in cleaned:
         # print_bad_abc(abc, tune_id)
         return '!!BAD ABC!!'
     return cleaned
-# endregion
+# endregion MAIN
