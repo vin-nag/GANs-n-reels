@@ -1,5 +1,6 @@
 from datetime import datetime
 
+# TODO - Sort the data prior to printing
 total = 0
 unique = set()
 family = dict()
@@ -82,6 +83,6 @@ def parse_stats(tunes, outfile=None):
 
 
 if __name__ == '__main__':
-    from PreProcessing import Tunes_raw
+    from Tunes import Tunes_raw
     tunes = Tunes_raw.tunes
-    parse_stats(tunes, 'PreProcessing/Stats_raw.txt')
+    parse_stats(tunes, '../Tunes/Stats_raw.txt')
