@@ -32,10 +32,3 @@ class Decoder():
         player.play()
 
         return
-
-
-song = "|G'E,CG,G,c'a,_b,|G'E,CG,G,c'a,_b,|E'bB'gb^A'e,d,|E'bB'gb^A'e,d,|G'E,CG,G,c'a,_b,|G'E,CG,G,c'a,_b,|E'bB'gb^A'e,d,|E'bB'gb^A'e,d,|G'E,CG,G,c'a,_b,|G'E,CG,G,c'a,_b,|E'bB'gb^A'e,d,|E'bB'gb^A'e,d,|G'E,CG,G,c'a,_b,|G'E,CG,G,c'a,_b,|E'bB'gb^A'e,d,|E'bB'gb^A'e,d,|"
-song2 = "B,B,CB,AGEEB,B,B,B,B,B,D,D,|EEeeefccAAAADDB,B,|B,,A,,E,D,G,G,A,A,CCE,F,B,,B,,G,,G,,|F,,F,,F,,E,,B,,B,,A,,B,,G,,A,,B,,B,,D,D,G,F,|CCCB,AAEEB,B,CCB,B,D,D,|EEeeefBBAAAAEEdc|deefggaad'd'bc'bbAA|ccccccggagbbefff|f'f'g'f'abggeeddc'c'aa|g'g'bbffbbbbbbe'd'cc|CCB,B,EEA,A,G,A,CCA,A,F,F,|B,CCCF,F,F,F,A,A,DDGGcd|CCG,G,F,F,A,A,A,A,FFccdd|eeBBBBaaggggeedc|BBfegfeeFFEEEECC|F,F,A,A,CCAAEEagggab"
-
-decoder = Decoder()
-decoder.play(song2)
