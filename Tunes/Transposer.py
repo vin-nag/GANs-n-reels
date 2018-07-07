@@ -16,6 +16,25 @@ modes = {'Ionian': 0, 'Major': 0, 'Dorian': 2, 'Phrygian': 4, 'Lydian': 5,
 sharp_order = 'FCGDAEB'
 flat_order = 'BEADGCF'
 
+# Dicts for note conversion
+note_numbers = {
+    'C': 60,
+    'D': 62,
+    'E': 64,
+    'F': 65,
+    'G': 67,
+    'A': 69,
+    'B': 71,
+    'c': 72,
+    'd': 74,
+    'e': 76,
+    'f': 77,
+    'g': 79,
+    'a': 81,
+    'b': 83,
+    'z': 0
+}
+
 # 12 semi-tones per octave
 # Up a key: +7 or -5
 # Down a key: -7 or +5

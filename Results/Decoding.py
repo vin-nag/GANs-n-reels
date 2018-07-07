@@ -7,13 +7,18 @@ class Decoder():
 
     def __init__(self):
 
-        self.header = 'X: 1\nT: AI Music\nR: reel' + \
-                        '\nM: 4/4\nL: 1/8\nK: Dmaj\n'
+        self.header = '''X: 1\n
+                        T: AI Music\n
+                        R: reel\n
+                        M: 4/4\n
+                        L: 1/48\n
+                        K: Dmaj\n'''
         return
 
     def play(self, input):
         """
         This function takes in a song in ABC format string and plays it using music21 and pygame modules
+        Note: Timidity must also be installed, as it's config file is required for the stream object.
         :param input: Generated song in ABC format
         :return: None
         """
