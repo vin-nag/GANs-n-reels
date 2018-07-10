@@ -40,9 +40,6 @@ def create_dict_list(tunes, types=None, meters=None, modes=None):
     Skips parsing the tune if it doesn't fit the parameters.
     :param modes: A list of strings which is checked against the appropriate dict key.
     Skips parsing the tune if it doesn't fit the parameters.
-    :param check_abc: If true, omits any tunes which contain characters not found in the
-    abc grammar. The check is very aggressive. It may be deprecated, or incoprated into
-    the normal filtering in the future.
     :return: A sorted list of relevant tun dictionaries.
     """
     cleaned = list()
@@ -59,7 +56,7 @@ def create_dict_list(tunes, types=None, meters=None, modes=None):
         if tune['abc'] != '!!BAD ABC!!':
             cleaned.append(tune)
 
-    print(len(cleaned))
+    print('{}/{} tunes successfully cleaned!'.format(len(cleaned), len(tunes)))
     return cleaned
 
 
@@ -81,12 +78,19 @@ def dicts_to_file(cleaned, fname):
         f.write("\n}")
 
 
-def master_clean(py_out, stats_out=None, default_folder='../Tunes/',
-                 types=None, meters=None, modes=None):
+def list_to_dict(lst):
     """
+    Takes a list of dicts, and returns a dict of dicts.
+    """
+    tunes = dict()
+    for x in lst:
+        tunes[x['setting']] = x
+    return tunes
 
-    :param py_out: Name of the file for the dict. Ex: 'Tunes.py'
-    :param stats_out: Name of the for the stats. Ex: 'Stats.txt'
+
+def raw_to_dict(fname, default_folder='../Tunes/', types=None, meters=None, modes=None, update=False):
+    """
+    :param fname: Name of the file for the dict. Ex: 'Tunes_abc.py'
     If given None, it will print the stats to screen.
     :param types: A list of strings which is checked against the appropriate dict key.
     Skips parsing the tune if it doesn't fit the parameters.
@@ -96,34 +100,35 @@ def master_clean(py_out, stats_out=None, default_folder='../Tunes/',
     Skips parsing the tune if it doesn't fit the parameters.
     :param default_folder: Optional path of a folder that the files should be saved in.
     Default is: '../Tunes/'
+    :param update: Flag to update the raw data from the Session's Github page.
     :return:
     """
     from Tunes import Tunes_raw as raw
     from PreProcessing import Generate_Stats
+    # If the update flag is set, retrieve the new data from the Session.
+    if update: update_tunes()
+
     # Sort the tunes and hand it to the cleaning function.
     tunes = sorted(raw.tunes, key=lambda x: int(x['setting']), reverse=True)
     clean = create_dict_list(tunes, types=types, meters=meters, modes=modes)
 
     # Generate the stats of the cleaned tunes and save them. Has a small check to prevent a file-out error.
-    if stats_out:
-        Generate_Stats.parse_stats(clean, default_folder + stats_out)
-    else:
-        Generate_Stats.parse_stats(clean, None)
-    dicts_to_file(clean, default_folder + py_out)
+    Generate_Stats.parse_stats(clean, default_folder + '/' + fname + '_Stats.txt')
+    dicts_to_file(clean, default_folder + '/' + fname + '.py')
+    return list_to_dict(clean)
 
 
 def simple_clean():
-    master_clean('Tunes_cleaned.py', stats_out='Stats_cleaned.txt')
+    raw_to_dict('Tunes_cleaned.py')
 
 
 def jigs_and_reels():
-    master_clean('Tunes_JR.py', stats_out='Stats_JR.txt', types=['jig', 'reel'])
+    raw_to_dict('Tunes_JR.py', types=['jig', 'reel'])
 
 
 def common_time_clean():
-    master_clean('Common_Time.py', stats_out='Common_Time_Stats.txt', meters=['4/4'])
+    raw_to_dict('Common_Time.py', meters=['4/4'])
 
 
 if __name__ == '__main__':
-    # update_tunes()
     common_time_clean()
