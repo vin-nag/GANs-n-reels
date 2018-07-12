@@ -12,10 +12,10 @@
 		<!-- Sidebar -->
 			<section id="sidebar">
 				<div class="inner">
+					<a href="#intro" class="fit align-right"><img src="images/logo.jpg" alt="home" data-position="center center" height="50"></a>
 					<nav>
 						<ul>
-							<li><a href="#intro" class="fit align-right"><img src="images/and.png" alt="home" data-position="center center" height="50"></a></li>
-							<li><a href="#intro" class="scrolly">Main</a></li>
+							<li>&nbsp;</li>
 							<li><a href="#motivation" class="scrolly">Motivation</a></li>
 							<li><a href="#bg" class="scrolly">Background Information</a></li>
 							<li><a href="#approach" class="scrolly">Approach</a></li>
@@ -36,19 +36,26 @@
 							<p>Creating Irish music using a Generative Adversarial Neural Network.</p>
 							<ul class="actions">
 								<li><a href="#motivation" class="button scrolly">Learn more</a></li>
+								<li><a href="https://github.com/vin-nag/GANs-n-reels" target="_blank" class="button">Code Repository</a></li>
 								<li><a href="#try" class="button scrolly">Try it out</a></li>
 							</ul>
 						</div>
 					</section>
 
 				<!-- Motivation -->
-					<section id="motivation" class="wrapper style2 fade-up">
+					<section id="motivation" class="wrapper style2 fullscreen fade-up">
 						<div class="inner">
 							<h2>Motivation</h2>
 							<p>Our research aims to discover if successful AI image generative models can also be used to generate music. We use a Generative Adversarial Network, a particular type of Artificial Neural Network, in an attempt to generate Irish music.</p>
-							<p>Irish music, as one of the primary influences on traditional Newfoundland music, tends toward straightforward melodies with a fixed format. It is a style intended to be played with a single instrument by amateur musicians, resulting in notation that is simple and easy to follow. These unique qualities are the primary motivation for choosing Irish music as our target.</p>
-							<p>Although there are other neural network based Irish music generators, we found no GANs which successfully generated music. These other neural networks use a prediction based approach to generate music. Unlike other networks, GANs could truly generate music from scratch, rather than using prediction.</p>
-							<p>GANs have worked well with pictures, but to our knowledge there has not been a successful attempt to generate music using GANs. Also, to our knowledge, no one has presented the idea of organizing music like a picture, which makes our encoding unique. </p>
+							<div class="box alt">
+								<div class="row gtr-uniform">
+									<div class="col-12"><span class="image fit"><img src="images/robotmusic.jpg" alt="Robot Playing a Piano" height="650" width="auto"/></span></div>
+								</div>
+							</div>
+
+							<p>Although there are other neural network based Irish music generators, we found no GANs which successfully generated music. These other neural networks use a prediction based approach to generate music. Unlike them, GANs could truly generate music from scratch.
+							GANs have worked well with pictures, but to our knowledge there has not been a successful attempt to generate music using GANs. Also, to our knowledge, no one has presented the idea of organizing music like a picture, which makes our encoding unique. </p>
+
 							<ul class="actions">
 								<li><a href="#bg" class="button scrolly">Background Information</a></li>
 							</ul>
@@ -56,27 +63,23 @@
 					</section>
 
 				<!-- Background and Related Works -->
-					<section id="bg" class="wrapper style3 fade-up">
+					<section id="bg" class="wrapper style3 fullscreen fade-up">
 						<div class="inner">
 							<h2>Background Information</h2>
-							<p> <span class="image left"><img src="images/irish%20music.jpg" alt="" /></span> In spite of emigration and a well-developed
-        						connection to music influences from Britain and the United States, Irish traditional music has kept many
-								of its elements and has itself influenced many forms of music, such as the folk music in Newfoundland and
-								Labrador. Irish traditional music includes many kinds of songs, including drinking songs, ballads and laments,
-								sung unaccompanied or with accompaniment by a variety of instruments.
-								Traditional dance music includes reels, hornpipes and jigs. In the nineteenth century folk
-								instruments would have included the flute, the fiddle and the uilleann pipes.
+							<p> <span class="image left"><img src="images/harp.jpg" alt="Man Playing an Irish Harp"/> </span> Irish music, as one of the primary influences on traditional Newfoundland music, tends toward straightforward melodies with a fixed format.
+								Irish traditional music includes many kinds of songs, including drinking songs, ballads and laments.
+								It is a style intended to be played with a single instrument by amateur musicians, resulting in notation that is simple and easy to follow.
+								Due to its' simplicity, Irish music can be represented easily using ABC notation. ABC Notation is a fairly robust notational system that enables people to write sheet music using only ASCII characters.
+								These unique qualities are the primary motivation for choosing Irish music as our target.
     						</p>
 
-							 <p> <span class="image right"><img src="images/gan.png" alt="" /></span> An Artificial Neural Network, or ANN, is based on a collection of connected units called nodes.
-								These nodes can be loosely compared to neurons in the human brain with
-								respect to their interconnectedness and influence on their neighbors.
-								There are various types of ANNs, many of which have been successfully used to classify,
+							 <p> <span class="image right"><img src="images/gan.png" alt="" /></span> An Artificial Neural Network, or ANN, is based on a collection of connected units called nodes, which
+								can be loosely compared to neurons in the human brain. There are various types of ANNs, many of which have been successfully used to classify,
 								predict, and generate different types of data.
 								A Generative Adversarial Network, or a GAN, is an ANN consisting of a Generator
 								that generates data when fed noise, and a Discriminator which classifies data.
 								A common analogy is the Generator is akin to an art forger, while the Discriminator is
-								like a detective. The analogy is useful as, after being trained, the Generator can be used
+								like a detective. After being trained, the Generator can be used
 								to create original ‘art’.
 							</p>
 
@@ -87,40 +90,39 @@
 					</section>
 
 				<!-- Approach -->
-					<section id="approach" class="wrapper style2 fade-up">
+					<section id="approach" class="wrapper style2 fullscreen fade-up">
 						<div class="inner">
 							<h2>Our Approach</h2>
 							<p>We hope to use the distinctive structure of Irish tunes to make them suitable for GAN-based music generation. Our main idea is to regard an Irish melody as a fixed-size object with cross-references among its parts: “music as a picture” view. The two key components of this project are: </p>
 							<div class="col-6 col-12-medium">
-									<ol>
-										<li>Preprocessing:</li>
-										<ul>
-											<li>Creating a well-defined format for music encoding suitable for GANs</li>
-											<li>Representing “vertical” dependencies in the tunes</li>
-										</ul>
-										<li>Modifying GANs for improved performance via:</li>
-										<ul>
-											<li>Statistical “Bagging” and “Boosting” to mimic the full input distribution</li>
-											<li>Modifying training rate to avoid “Mode Collapse”</li>
-										</ul>
-									</ol>
+								<span class="image right"><img src="images/process.png" alt="" /></span>
+								<ol>
+									<li>Preprocessing:</li>
+									<ul>
+										<li>Creating a well-defined format for music encoding suitable for GANs</li>
+										<li>Representing “vertical” dependencies in the tunes</li>
+									</ul>
+									<li>Modifying GANs for improved performance via:</li>
+									<ul>
+										<li>Statistical “Bagging” and “Boosting” to mimic the full input distribution</li>
+										<li>Modifying training rate to avoid “Mode Collapse”</li>
+									</ul>
+								</ol>
 							</div>
-							<div class="col-4-small"><span class="image fit"><img src="images/process.png" alt="" /></span></div>
 							<ul class="actions">
 								<li><a href="#results" class="button scrolly">Results</a></li>
 							</ul>
+						</div>
 					</section>
 
 				<!-- Results -->
-					<section id="results" class="wrapper style3 fade-up">
+					<section id="results" class="wrapper style3 fullscreen fade-up">
 						<div class="inner">
 							<h2>Results</h2>
 							<p>Check back here for more findings soon. Here are some images generated while coming up with our Music as a Picture view. Our code and interesting findings and results will be uploaded here as well as to an online repository for public access
         					<a href="https://github.com/vin-nag/GANs-n-reels" target="_blank">here.</a></p>
 							<div class="box alt">
 								<div class="row gtr-uniform">
-									<div class="col-6"><span class="image fit"><img src="images/song%20type.png" alt="" /></span></div>
-									<div class="col-6"><span class="image fit"><img src="images/song%20scale.png" alt="" /></span></div>
 									<div class="col-6 col-12"><span class="image fit"><img src="images/vectorized%20image.png" alt="" /></span></div>
 								</div>
 							</div>
@@ -131,7 +133,7 @@
 					</section>
 
 				<!-- Try It Out -->
-					<section id="try" class="wrapper style2 fade-up">
+					<section id="try" class="wrapper style2 fullscreen fade-up">
 						<div class="inner">
 							<h2>Try It Out</h2>
 							<p>Coming Soon</p>
