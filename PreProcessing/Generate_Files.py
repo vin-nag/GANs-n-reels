@@ -56,7 +56,7 @@ def create_dict_list(tunes, types=None, meters=None, modes=None):
         if tune['abc'] != '!!BAD ABC!!':
             cleaned.append(tune)
 
-    print(len(cleaned))
+    print('{}/{} tunes successfully cleaned!'.format(len(cleaned), len(tunes)))
     return cleaned
 
 
@@ -90,7 +90,7 @@ def list_to_dict(lst):
 
 def raw_to_dict(fname, default_folder='../Tunes/', types=None, meters=None, modes=None, update=False):
     """
-    :param fname: Name of the file for the dict. Ex: 'Tunes.py'
+    :param fname: Name of the file for the dict. Ex: 'Tunes_abc.py'
     If given None, it will print the stats to screen.
     :param types: A list of strings which is checked against the appropriate dict key.
     Skips parsing the tune if it doesn't fit the parameters.

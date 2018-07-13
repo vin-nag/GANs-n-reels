@@ -12,6 +12,7 @@ Vectorizing:
     Vectorizing is the process of converting filtered and cleaned strings into matricies of numbers
 
 Note that throughout this module "filtering" means removing rows entirely while "cleaning" means modifying them inplace
+
 """
 from Tunes_cleaned import tunes
 import pandas as pd
