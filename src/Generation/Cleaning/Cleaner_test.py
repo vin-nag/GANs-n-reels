@@ -1,5 +1,5 @@
 import unittest
-from src.Generation import Cleaner
+from src.Generation.Cleaning import Cleaner
 
 
 class TestCleaner(unittest.TestCase):

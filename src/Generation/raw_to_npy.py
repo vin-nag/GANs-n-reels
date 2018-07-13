@@ -1,7 +1,6 @@
 from Data.Raw import The_Session_Raw as raw
-from src.Generation import Generate_Stats
-from src.Generation import Generate_Files
-from src.Generation import Vectorizer
+from src.Generation.Cleaning import Generate_Stats, Generate_Files
+from src.Generation.Vectorizing import Vectorizer
 import os
 import pandas as pd
 import numpy as np

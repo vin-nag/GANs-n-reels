@@ -1,4 +1,4 @@
-from src.Generation import Cleaner as Clean
+from src.Generation.Cleaning import Cleaner as Clean
 from datetime import datetime
 from requests import get
 from requests.exceptions import RequestException
