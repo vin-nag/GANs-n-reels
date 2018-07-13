@@ -3,6 +3,63 @@ from music21 import converter
 from music21 import instrument
 from music21.midi.realtime import StreamPlayer
 
+number_notes = {
+    60: 'C',
+    62: 'D',
+    64: 'E',
+    65: 'F',
+    67: 'G',
+    69: 'A',
+    71: 'B',
+    72: 'c',
+    74: 'd',
+    76: 'e',
+    77: 'f',
+    79: 'g',
+    81: 'a',
+    83: 'b',
+    0: 'z'
+}
+
+
+def condenser(pitches, held):
+    x = 0
+    master = []
+    lst = list()
+    while x < len(pitches):
+        lst.append(pitches[x])
+        x += 1
+        if x == len(pitches) or held[x] == 1:
+            master.append(lst)
+            lst = []
+
+    out = ''
+    for x in master:
+        prepend = ''
+        append = ''
+        hold = ''
+        num = x[0]
+        if not (num == 0 or (60 <= num <= 83)):
+            if num > 83:
+                mult = (num-72)//12
+                append = '\'' * mult
+                num = num - (12 * mult)
+            else: # x[0] < 60
+                mult = ((num-60)//12) * -1
+                append = ',' * mult
+                num = num + (12 * mult)
+
+        if num not in number_notes:
+            num = num - 1
+            prepend = '^'
+
+        char = number_notes[num]
+
+        if len(x) != 1: hold = str(len(x))
+        out += prepend + char + append + hold
+    return out
+
+
 class Decoder():
 
     def __init__(self):
