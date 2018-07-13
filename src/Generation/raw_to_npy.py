@@ -5,13 +5,13 @@ import numpy as np
 import src.Generation.Vectorizer as Vectorizer
 
 # Flag for whether to update the Tunes_raw.py file from the session's github.
-# If true, the raw Data will update, if false, the Data won't update.
+# If true, the Raw Data will update, if false, the Data won't update.
 UPDATE_RAW = False
 
 # The files to write to.
-FOLDER_NAME = '../Tunes'
+FOLDER_NAME = '../../Data/'
 PYTHON_FILE_NAME = 'Common_Time'
-NUMPY_FILE_NAME = 'tunes'
+NUMPY_FILE_NAME = 'Common_Time'
 
 BAR_SUBDIVISION = 48
 
@@ -27,8 +27,8 @@ def make_folder(f_name):
 
 def raw_abc_to_npy_file():
     make_folder(FOLDER_NAME)
-    make_folder(FOLDER_NAME + '/abc')
-    make_folder(FOLDER_NAME + '/npy')
+    make_folder(FOLDER_NAME + '/Clean')
+    make_folder(FOLDER_NAME + '/Vectors')
 
     print('Starting abc cleaning...')
     # TODO - Using the dictionary provided by the raw_to_dict function causes the numpy array to throw an error.
@@ -39,7 +39,7 @@ def raw_abc_to_npy_file():
 
     print('Finished cleaning abc strings.')
     print('Starting vectorization process.')
-    from Tunes.abc.Common_Time import tunes as tunes_raw
+    from Data.Clean.Common_Time import tunes as tunes_raw
     print('Creating dataframe...')
     tunes = pd.DataFrame.from_dict(tunes_raw, orient='index')
     tunes['abc_raw'] = tunes.abc # preserve the original abc strings

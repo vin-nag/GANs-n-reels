@@ -11,10 +11,10 @@ def update_tunes():
     Gets the tunes from "The Session"'s Github page, and prints it
     as a python dictionary.
     """
-    url = 'https://raw.githubusercontent.com/adactio/TheSession-Data/master/json/tunes.json'
+    url = 'https://raw.githubusercontent.com/adactio/TheSession-data/master/json/tunes.json'
     try:
         with closing(get(url, stream=True)) as resp:
-            with open('../Tunes/Tunes_raw.py', 'w') as f:
+            with open('../../Data/Raw/The_Session_Raw.py', 'w') as f:
                 text = resp.content.decode('utf-8')
                 temp = ast.literal_eval(text)
 
@@ -88,7 +88,7 @@ def list_to_dict(lst):
     return tunes
 
 
-def raw_to_dict(fname, default_folder='../Tunes/', types=None, meters=None, modes=None, update=False):
+def raw_to_dict(fname, default_folder='../../Data/', types=None, meters=None, modes=None, update=False):
     """
     :param fname: Name of the file for the dict. Ex: 'Tunes_abc.py'
     If given None, it will print the stats to screen.
@@ -99,11 +99,11 @@ def raw_to_dict(fname, default_folder='../Tunes/', types=None, meters=None, mode
     :param modes: A list of strings which is checked against the appropriate dict key.
     Skips parsing the tune if it doesn't fit the parameters.
     :param default_folder: Optional path of a folder that the files should be saved in.
-    Default is: '../Tunes/'
-    :param update: Flag to update the raw Data from the Session's Github page.
+    Default is: '../../Data/'
+    :param update: Flag to update the Raw Data from the Session's Github page.
     :return:
     """
-    from Tunes import Tunes_raw as raw
+    from Data.Raw import The_Session_Raw as raw
     from src.Generation import Generate_Stats
     # If the update flag is set, retrieve the new Data from the Session.
     if update: update_tunes()
@@ -113,8 +113,8 @@ def raw_to_dict(fname, default_folder='../Tunes/', types=None, meters=None, mode
     clean = create_dict_list(tunes, types=types, meters=meters, modes=modes)
 
     # Generate the stats of the cleaned tunes and save them. Has a small check to prevent a file-out error.
-    Generate_Stats.parse_stats(clean, default_folder + '/' + fname + '_Stats.txt')
-    dicts_to_file(clean, default_folder + '/' + fname + '.py')
+    Generate_Stats.parse_stats(clean, default_folder + fname + '.txt')
+    dicts_to_file(clean, default_folder + fname + '.py')
     return list_to_dict(clean)
 
 
@@ -131,4 +131,5 @@ def common_time_clean():
 
 
 if __name__ == '__main__':
-    common_time_clean()
+    update_tunes()
+    # common_time_clean()
