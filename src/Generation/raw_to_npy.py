@@ -1,17 +1,27 @@
+from Data.Raw import The_Session_Raw as raw
+from src.Generation import Generate_Stats
 from src.Generation import Generate_Files
+from src.Generation import Vectorizer
 import os
 import pandas as pd
 import numpy as np
-import src.Generation.Vectorizer as Vectorizer
+
 
 # Flag for whether to update the Tunes_raw.py file from the session's github.
 # If true, the Raw Data will update, if false, the Data won't update.
 UPDATE_RAW = False
 
 # The files to write to.
-FOLDER_NAME = '../../Data/'
-PYTHON_FILE_NAME = 'Common_Time'
-NUMPY_FILE_NAME = 'Common_Time'
+FOLDER_NAME = '../../Data'
+ABC_OUT = '/Clean/'
+STATS_OUT = '/Statistics/'
+NPY_OUT = '/Vectors/'
+FILE_NAME = 'Common_Time'
+
+#
+TYPES = []
+METER = ['4/4']
+MODES = []
 
 BAR_SUBDIVISION = 48
 
@@ -25,17 +35,42 @@ def make_folder(f_name):
             print('Folder "{}" already exists. Skipping creation...'.format(f_name))
 
 
+def raw_to_dict(types=None, meters=None, modes=None, update=False):
+    """
+    :param types: A list of strings which is checked against the appropriate dict key.
+    Skips parsing the tune if it doesn't fit the parameters.
+    :param meters: A list of strings which is checked against the appropriate dict key.
+    Skips parsing the tune if it doesn't fit the parameters.
+    :param modes: A list of strings which is checked against the appropriate dict key.
+    Skips parsing the tune if it doesn't fit the parameters.
+    :param update: Flag to update the Raw Data from the Session's Github page.
+    :return:
+    """
+
+    # If the update flag is set, retrieve the new Data from the Session.
+    if update: Generate_Files.update_tunes()
+
+    # Sort the tunes and hand it to the cleaning function.
+    clean = Generate_Files.create_dict_list(raw.tunes, types=types, meters=meters, modes=modes)
+
+    # Generate the stats of the cleaned tunes and save them. Has a small check to prevent a file-out error.
+    Generate_Stats.parse_stats(clean, FOLDER_NAME + STATS_OUT + FILE_NAME + '.txt')
+    Generate_Files.dicts_to_file(clean, FOLDER_NAME + ABC_OUT + FILE_NAME + '.py')
+
+    tunes = dict()
+    for x in clean: tunes[x['setting']] = x
+    return tunes
+
+
 def raw_abc_to_npy_file():
     make_folder(FOLDER_NAME)
-    make_folder(FOLDER_NAME + '/Clean')
-    make_folder(FOLDER_NAME + '/Vectors')
+    make_folder(FOLDER_NAME + ABC_OUT)
+    make_folder(FOLDER_NAME + STATS_OUT)
+    make_folder(FOLDER_NAME + NPY_OUT)
 
     print('Starting abc cleaning...')
     # TODO - Using the dictionary provided by the raw_to_dict function causes the numpy array to throw an error.
-    tunes = Generate_Files.raw_to_dict(PYTHON_FILE_NAME, default_folder=FOLDER_NAME + '/abc', update=UPDATE_RAW,
-                                       types=[],
-                                       meters=['4/4'],
-                                       modes=[])
+    tunes = raw_to_dict(update=UPDATE_RAW, types=[], meters=['4/4'], modes=[])
 
     print('Finished cleaning abc strings.')
     print('Starting vectorization process.')
@@ -52,8 +87,8 @@ def raw_abc_to_npy_file():
     tunes_shaped.reset_index(drop=True, inplace=True)
     tunes_shaped.head()
 
-    np.save(FOLDER_NAME + '/npy/' + NUMPY_FILE_NAME + '_notes', tunes_shaped.notes.values)
-    np.save(FOLDER_NAME + '/npy/' + NUMPY_FILE_NAME + '_time', tunes_shaped.timing.values)
+    np.save(FOLDER_NAME + NPY_OUT + FILE_NAME + '_Notes.npy', tunes_shaped.notes.values)
+    np.save(FOLDER_NAME + NPY_OUT + FILE_NAME + '_Time.npy', tunes_shaped.timing.values)
 
 
 if __name__ == '__main__':

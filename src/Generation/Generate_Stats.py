@@ -83,6 +83,5 @@ def parse_stats(tunes, outfile=None):
 
 
 if __name__ == '__main__':
-    from Tunes import Tunes_raw
-    tunes = Tunes_raw.tunes
-    parse_stats(tunes, '../Tunes/Stats_raw.txt')
+    from Data.Raw.The_Session_Raw import tunes
+    parse_stats(tunes, '.../../Data/Statistics/The_Session_Raw.txt')
