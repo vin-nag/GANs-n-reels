@@ -99,7 +99,7 @@ class RandomGenerator:
                 + ['reel']*1 \
                 + ['jig']*1 \
             )
-        elif self.option == 1 or 2:
+        else:
             # Percentages are multiplied by 100 to give ints
             style = random.choice(
                 ['hornpipe']*727 \
@@ -128,7 +128,7 @@ class RandomGenerator:
                 + ['3/4']*1 \
                 + ['6/8']*1 \
             )
-        elif self.option == 1:
+        else:
             time = random.choice(
                 ['2/4']*733 \
                 + ['3/2']*92 \
@@ -136,7 +136,7 @@ class RandomGenerator:
                 + ['9/8']*378 \
                 + ['4/4']*5245 \
                 + ['3/4']*851 \
-                + ['6/8']*2460 \
+                + ['6/8']*2460
             )
         return time
 
@@ -194,7 +194,7 @@ class RandomGenerator:
                 + ['Bdorian']*1 \
                 + ['Eminor']*1 \
             )
-        elif self.option == 1 or 2:
+        else:
             mode = random.choice(
                 ['Gdorian']*78 \
                 + ['Edorian']*442 \
@@ -238,3 +238,14 @@ class RandomGenerator:
             
             self.songs[x] = {'tune':x, 'setting':x, 'name':title, 'type':style, 'meter':timeSig, 'L':noteLen, 'mode':key, 'abc':abc}
         return self.songs
+
+
+if __name__ == '__main__':
+    from src.Generation.Vectorizing.Decoding import Decoder
+
+    player = Decoder()
+
+    gen = RandomGenerator(2)
+    song = gen.generateSongs(1)
+    print(song)
+    player.play(song[0]['abc'])

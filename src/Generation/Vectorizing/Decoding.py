@@ -68,7 +68,7 @@ class Decoder():
                         T: AI Music\n
                         R: reel\n
                         M: 4/4\n
-                        L: 1/48\n
+                        L: 1/8\n
                         K: Dmaj\n'''
         return
 
@@ -94,3 +94,13 @@ class Decoder():
         player.play()
 
         return
+
+
+if __name__ == '__main__':
+    drowsy_maggie = '''|:E2BE dEBE|E2BE AFDF|E2BE dEBE|1 BABc dAFD:|2 BABc dAFA||
+                    |:d2fd cdec|defg afge|1 d2fd c2ec|BABc dAFA:|2 afge fdec|BABc dAFA||
+                    |:dBfB dBfB|cAeA cAeA|1 dBfB dBfB|defg aece:|2 defg aecA|BABc dAFA||
+                    |:dffe dfBf|ceed ceAe|1 dffe defg|a2ag aece:|2 af=ge fdec|BABc dAFD||'''
+
+    decode = Decoder()
+    decode.play(drowsy_maggie)
