@@ -26,10 +26,12 @@ def make_folder(f_name):
 
 
 def raw_abc_to_npy_file():
+    make_folder(FOLDER_NAME)
     make_folder(FOLDER_NAME + '/abc')
     make_folder(FOLDER_NAME + '/npy')
 
     print('Starting abc cleaning...')
+    # TODO - Using the dictionary provided by the raw_to_dict function causes the numpy array to throw an error.
     tunes = Generate_Files.raw_to_dict(PYTHON_FILE_NAME, default_folder=FOLDER_NAME+'/abc', update=UPDATE_RAW,
                                        types=[],
                                        meters=['4/4'],
