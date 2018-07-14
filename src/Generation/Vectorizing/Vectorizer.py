@@ -23,21 +23,23 @@ def vectorize_frame(df, bar_subdivision=48, reindex=True, pad_bars=True):
     BAR_SUBDIVISION = bar_subdivision
     NOTE_MULT = bar_subdivision // 8
     PAD_BARS = pad_bars
-    df['notes'], df['timing'] = zip(*df['abc'].map(vectorize_abc()))
-    # print(df['notes'].head)
+    df['notes'], df['timing'] = zip(*df.apply(vectorize_abc, axis=1))
     df['notes'] = df['notes'] + df['mode'].map(transpose_tune)
     if reindex: df.reset_index(drop=True, inplace=True)
     return df
 
 
-def vectorize_abc(abc_string, key):
+def vectorize_abc(df):
     """
     takes an abc string and returns the note vector and timing vector, split by bars
     """
+
+    abc_string = df['abc']
+    accs, mod = get_sharps_or_flats(df['mode'])
     note_out = []
     time_out = []
     for bar in split_by_bar(abc_string):
-        note, time = vectorize_bar(bar)
+        note, time = vectorize_bar(bar, accs, mod)
         note_out.append(note)
         time_out.append(time)
     return np.array(note_out), np.array(time_out)
@@ -93,7 +95,7 @@ def vectorize_bar(abc_string):
 '''
 
 
-def vectorize_bar(abc_string, pad_bars=True):
+def vectorize_bar(abc_string, accs, mod, pad_bars=True):
     """
     Takes an ABC string of an individual bar and returns that same bar but with 48 notes
     returns the the string of notes as well as a 'timing vector'
@@ -116,7 +118,7 @@ def vectorize_bar(abc_string, pad_bars=True):
             raise Exception(
                 "{}*{}/{} is not an integer. Your note multiplier is insufficient".format(NOTE_MULT, num, denom))
         reps = ((NOTE_MULT * num) // denom)
-        note_num = note_to_number(note)
+        note_num = note_to_number(note, accs, mod)
         note_out += [note_num for n in range(reps)]
         time = [0] * reps
         time[0] = 1
@@ -189,12 +191,11 @@ def get_sharps_or_flats(key):
     diff = key_list.index(relative) - 5
 
     if diff > 0:
-        sharps_flats = sharp_order[0:diff-1]
+        return sharp_order[0:diff-1], 1
     elif diff < 0:
-        sharps_flats = flat_order[0:diff-1]
+        return flat_order[0:diff-1], -1
     else:
-        sharps_flats = ''
-    return sharps_flats
+        return '', 0
 
 
 def transpose_tune(key):
@@ -213,7 +214,7 @@ def transpose_tune(key):
         return -trans_down
 
 
-def note_to_number(abc_note):
+def note_to_number(abc_note, accs, mod):
     reg = re.search('([_=^]*)([a-gzA-G])([,\']*)', abc_note)
     accidental = reg.group(1)
     note = reg.group(2)
@@ -223,8 +224,8 @@ def note_to_number(abc_note):
         for char in accidental:
             val += accidentals[char]
     else:
-        # TODO - Modify note based on key
-        pass
+        if note.upper() in accs:
+            val += mod
     for char in octave:
         val += octaves[char]
     return val

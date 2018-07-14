@@ -62,28 +62,43 @@ def condenser(pitches, held):
 
 class Decoder():
 
-    def __init__(self):
+    def __init__(self, time='1/48', key='Cmaj'):
 
-        self.header = '''X: 1\n
-                        T: AI Music\n
-                        R: reel\n
-                        M: 4/4\n
-                        L: 1/8\n
-                        K: Dmaj\n'''
-        return
+        self.time = time
+        self.key = key
 
-    def play(self, input):
+    def gen_header(self):
+        header = '''X: 1\n
+                    T: AI Music\n
+                    R: reel\n
+                    M: 4/4\n
+                    L: ''' + self.time + '''\n
+                    K: ''' + self.key + '''\n'''
+        return header
+
+    def set_key(self, key):
+        self.key = key
+
+    def set_time(self, time):
+        self.time = time
+
+    def play_from_dict(self, dic):
+        self.set_key(dic['mode'])
+        self.set_time('1/8')
+        self.play(dic['abc'])
+
+    def play(self, abc):
         """
         This function takes in a song in ABC format string and plays it using music21 and pygame modules
         Note: Timidity must also be installed, as it's config file is required for the stream object.
-        :param input: Generated song in ABC format
+        :param abc: Generated song in ABC format
         :return: None
         """
 
-        input = self.header + input
+        abc = self.gen_header() + abc
 
         # convert abc format to stream object
-        tune = converter.parseData(input, format='abc')
+        tune = converter.parseData(abc, format='abc')
 
         # add harp instrument
         for p in tune.parts:
@@ -102,5 +117,5 @@ if __name__ == '__main__':
                     |:dBfB dBfB|cAeA cAeA|1 dBfB dBfB|defg aece:|2 defg aecA|BABc dAFA||
                     |:dffe dfBf|ceed ceAe|1 dffe defg|a2ag aece:|2 af=ge fdec|BABc dAFD||'''
 
-    decode = Decoder()
+    decode = Decoder(time='1/8')
     decode.play(drowsy_maggie)
