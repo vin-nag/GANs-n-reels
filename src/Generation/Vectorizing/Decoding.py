@@ -2,6 +2,8 @@
 from music21 import converter
 from music21 import instrument
 from music21.midi.realtime import StreamPlayer
+import pandas as pd
+import numpy as np
 
 number_notes = {
     60: 'C',
@@ -86,6 +88,12 @@ class Decoder():
         self.set_key(dic['mode'])
         self.set_time('1/8')
         self.play(dic['abc'])
+
+    def play_from_vector(self, vec):
+        self.set_key('Cmaj')
+        self.set_time('1/48')
+        abc = condenser(list(vec['note']), list(vec['timing']))
+        self.play(abc)
 
     def play(self, abc):
         """
