@@ -23,13 +23,14 @@ def vectorize_frame(df, bar_subdivision=48, reindex=True, pad_bars=True):
     BAR_SUBDIVISION = bar_subdivision
     NOTE_MULT = bar_subdivision // 8
     PAD_BARS = pad_bars
-    df['notes'], df['timing'] = zip(*df.abc.map(vectorize_abc))
+    df['notes'], df['timing'] = zip(*df['abc'].map(vectorize_abc()))
+    # print(df['notes'].head)
     df['notes'] = df['notes'] + df['mode'].map(transpose_tune)
     if reindex: df.reset_index(drop=True, inplace=True)
     return df
 
 
-def vectorize_abc(abc_string):
+def vectorize_abc(abc_string, key):
     """
     takes an abc string and returns the note vector and timing vector, split by bars
     """
@@ -91,6 +92,7 @@ def vectorize_bar(abc_string):
     return np.array(note_out), np.array(time_out)
 '''
 
+
 def vectorize_bar(abc_string, pad_bars=True):
     """
     Takes an ABC string of an individual bar and returns that same bar but with 48 notes
@@ -123,11 +125,11 @@ def vectorize_bar(abc_string, pad_bars=True):
     if pad_bars and len(note_out) != BAR_SUBDIVISION:
         pad_num = BAR_SUBDIVISION - len(note_out)
         if len(notes) < 4:
-            note_out += [0 for n in range(pad_num)]
-            time_out += [0 for n in range(pad_num)]
+            note_out += [0 for _ in range(pad_num)]
+            time_out += [0 for _ in range(pad_num)]
         else:
-            note_out = [0 for n in range(pad_num)] + note_out
-            note_out = [0 for n in range(pad_num)] + note_out
+            note_out = [0 for _ in range(pad_num)] + note_out
+            time_out = [0 for _ in range(pad_num)] + time_out
     return np.array(note_out), np.array(time_out)
 
 
@@ -203,12 +205,12 @@ def transpose_tune(key):
     diff = key_list.index(relative) - 5
 
     trans_up = (7 * diff) % 12
-    trans_down = ((-5 * diff) % 12)
+    trans_down = (5 * diff % 12)
 
-    if trans_up < abs(trans_down):
+    if trans_up < trans_down:
         return trans_up
     else:
-        return trans_down
+        return -trans_down
 
 
 def note_to_number(abc_note):
@@ -226,3 +228,13 @@ def note_to_number(abc_note):
     for char in octave:
         val += octaves[char]
     return val
+
+
+if __name__ == '__main__':
+    from Data.Clean.Common_Time import tunes as tunes_raw
+    print('Creating dataframe...')
+    tunes = pd.DataFrame.from_dict(tunes_raw, orient='index')
+    tunes['abc_raw'] = tunes.abc # preserve the original abc strings
+    tunes = vectorize_frame(tunes, pad_bars=True)
+
+
