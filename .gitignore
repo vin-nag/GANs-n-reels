@@ -158,8 +158,6 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-.gitignore
-.idea/GANs-n-reels.iml
 .idea/inspectionProfiles/
 .idea/misc.xml
 .idea/modules.xml
