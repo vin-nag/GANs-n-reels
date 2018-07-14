@@ -24,6 +24,7 @@ def vectorize_frame(df, bar_subdivision=48, reindex=True, pad_bars=True):
     NOTE_MULT = bar_subdivision // 8
     PAD_BARS = pad_bars
     df['notes'], df['timing'] = zip(*df.abc.map(vectorize_abc))
+    df['notes'] = df['notes'] + df['mode'].map(transpose_tune)
     if reindex: df.reset_index(drop=True, inplace=True)
     return df
 
@@ -149,7 +150,7 @@ note_numbers = {
     'z': 0
 }
 
-accidentals = {'_': -1, '^': 1}
+accidentals = {'_': -1, '=': 0, '^': 1}
 octaves = {',': -12, "'": 12}
 
 
