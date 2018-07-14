@@ -49,6 +49,7 @@ def split_by_bar(abc_string):
     return [x for x in result if x != '']
 
 
+'''
 def vectorize_bar(abc_string):
     """
     Takes an ABC string of an individual bar and returns that same bar but with BAR_SUBDIVISION notes
@@ -87,7 +88,7 @@ def vectorize_bar(abc_string):
             note_out = [0 for n in range(pad_num)] + note_out
             note_out = [0 for n in range(pad_num)] + note_out
     return np.array(note_out), np.array(time_out)
-
+'''
 
 def vectorize_bar(abc_string, pad_bars=True):
     """
@@ -152,14 +153,75 @@ accidentals = {'_': -1, '^': 1}
 octaves = {',': -12, "'": 12}
 
 
+notes_to_num = {'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3,
+                'E': 4, 'Fb': 4, 'E#': 5, 'F': 5, 'F#': 6, 'Gb': 6,
+                'G': 7, 'G#': 8, 'Ab': 8, 'A': 9, 'A#': 10, 'Bb': 10,
+                'B': 11, 'Cb': 11, 'B#': 0}
+
+
+num_to_notes = {0: 'C', 1: 'Db', 2: 'D', 3: 'Eb', 4: 'E', 5: 'F',
+                6: 'F#', 7: 'G', 8: 'Ab', 9: 'A', 10: 'Bb', 11: 'B'}
+
+key_list = ['Db', 'Ab', 'Eb', 'Bb', 'F', 'C', 'G', 'D', 'A', 'E', 'B', 'F#']
+
+
+modes = {'ionian': 0, 'major': 0, 'dorian': 2, 'phrygian': 4, 'lydian': 5,
+         'mixolydian': 7, 'aeolian': 9, 'minor': 9, 'locrian': 11}
+
+sharp_order = 'FCGDAEB'
+flat_order = 'BEADGCF'
+
+# 12 semi-tones per octave
+# Up a key: +7 or -5
+# Down a key: -7 or +5
+
+# key_list index - 5 = number of accidentals, where + is sharps and - is flats.
+
+
+def get_sharps_or_flats(key):
+    tonic = notes_to_num[key[0]]
+    mode = modes[key[1:]]
+    relative = num_to_notes[(tonic - mode) % 12]
+
+    diff = key_list.index(relative) - 5
+
+    if diff > 0:
+        sharps_flats = sharp_order[0:diff-1]
+    elif diff < 0:
+        sharps_flats = flat_order[0:diff-1]
+    else:
+        sharps_flats = ''
+    return sharps_flats
+
+
+def transpose_tune(key):
+    tonic = notes_to_num[key[0]]
+    mode = modes[key[1:]]
+    relative = num_to_notes[(tonic - mode) % 12]
+
+    diff = key_list.index(relative) - 5
+
+    trans_up = (7 * diff) % 12
+    trans_down = ((-5 * diff) % 12)
+
+    if trans_up < abs(trans_down):
+        return trans_up
+    else:
+        return trans_down
+
+
 def note_to_number(abc_note):
     reg = re.search('([_=^]*)([a-gzA-G])([,\']*)', abc_note)
     accidental = reg.group(1)
     note = reg.group(2)
     octave = reg.group(3)
     val = note_numbers[note]
-    if accidental in accidentals:
-        val += accidentals[accidental]
+    if accidental != '':
+        for char in accidental:
+            val += accidentals[char]
+    else:
+        # TODO - Modify note based on key
+        pass
     for char in octave:
         val += octaves[char]
     return val
