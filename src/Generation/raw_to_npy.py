@@ -77,14 +77,19 @@ def raw_abc_to_npy_file():
     print('Creating dataframe...')
     tunes = pd.DataFrame.from_dict(tunes_raw, orient='index')
     tunes['abc_raw'] = tunes.abc # preserve the original abc strings
-    tunes = Vectorizer.vectorize_frame(tunes, pad_bars=True)
+    tunes = Vectorizer.vectorize_frame(tunes, pad_bars=True, bar_subdivision=16)
 
     print("Size of Initial Frame: {}".format(len(tunes.index)))
     tunes.head()
     tunes_shaped = tunes[[len(tune.shape)==2 for tune in tunes.notes]].copy()
     print("Size of Cleaned Frame: {}".format(len(tunes_shaped.index)))
     tunes_shaped.reset_index(drop=True, inplace=True)
-    tunes_shaped.head()
+    print('\n - - - - - - - Table Data - - - - - - - \n')
+    print(tunes_shaped.head()['notes'])
+    for x in tunes_shaped.head()['notes']:
+        print('Tune')
+        for y in x: print(y)
+        print()
 
     np.save(FOLDER_NAME + NPY_OUT + FILE_NAME + '_Notes.npy', tunes_shaped.notes.values)
     np.save(FOLDER_NAME + NPY_OUT + FILE_NAME + '_Time.npy', tunes_shaped.timing.values)
