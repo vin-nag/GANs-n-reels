@@ -125,5 +125,7 @@ if __name__ == '__main__':
                     |:dBfB dBfB|cAeA cAeA|1 dBfB dBfB|defg aece:|2 defg aecA|BABc dAFA||
                     |:dffe dfBf|ceed ceAe|1 dffe defg|a2ag aece:|2 af=ge fdec|BABc dAFD||'''
 
-    decode = Decoder(time='1/8')
-    decode.play(drowsy_maggie)
+    decode = Decoder(time='1/16')
+
+    from src.Model.Tunes_16th_V2 import tunes
+    decode.play(tunes[18])

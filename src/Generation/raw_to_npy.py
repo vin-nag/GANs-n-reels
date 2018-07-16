@@ -86,10 +86,12 @@ def raw_abc_to_npy_file():
     tunes_shaped.reset_index(drop=True, inplace=True)
     print('\n - - - - - - - Table Data - - - - - - - \n')
     print(tunes_shaped.head()['notes'])
+    '''
     for x in tunes_shaped.head()['notes']:
         print('Tune')
         for y in x: print(y)
         print()
+    '''
 
     np.save(FOLDER_NAME + NPY_OUT + FILE_NAME + '_Notes.npy', tunes_shaped.notes.values)
     np.save(FOLDER_NAME + NPY_OUT + FILE_NAME + '_Time.npy', tunes_shaped.timing.values)
