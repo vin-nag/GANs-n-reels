@@ -12,12 +12,13 @@
 		<!-- Sidebar -->
 			<section id="sidebar">
 				<div class="inner">
-					<a href="#intro" class="fit align-right"><img src="images/and.png" alt="home" data-position="center center" height="100"></a>
+					<a href="#intro" class="icon fit "><img src="images/title.png" alt="home" data-position="center center" height="50"></a>
 					<nav>
 						<ul>
 							<li>&nbsp;</li>
 							<li><a href="#motivation" class="scrolly">Motivation</a></li>
-							<li><a href="#bg" class="scrolly">Background Information</a></li>
+							<li><a href="#irish" class="scrolly">Irish Music</a></li>
+							<li><a href="#gan" class="scrolly">GAN</a></li>
 							<li><a href="#approach" class="scrolly">Approach</a></li>
 							<li><a href="#results" class="scrolly">Results</a></li>
 							<li><a href="#us" class="scrolly">Who We Are</a></li>
@@ -47,32 +48,80 @@
 						<div class="inner">
 
 							<h2>Motivation</h2>
-							<p>Our research aims to discover if successful AI image generative models can also be used to generate music. We use a Generative Adversarial Network, a particular type of Artificial Neural Network, in an attempt to generate Irish music.</p>
-							<div class="inner">
-								<img src="images/robotmusic.jpg" alt="Robot Playing a Piano" height="500" width="100%" />
+							<div class="image align-center fit">
+								<figure>
+									<img src="images/robotmusic.jpg" alt="Robot Playing Music"/>
+									<figcaption> Photo by <a href="https://unsplash.com/photos/U3sOwViXhkY?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText" target="_blank">Franck V.</a>  on Unsplash </figcaption>
+								</figure>
+
 							</div>
+
+							<p>Our research aims to discover if successful AI image generative models can also be used to generate music. We use a Generative Adversarial Network, a particular type of Artificial Neural Network, in an attempt to generate Irish music.</p>
+
 							<p>Although there are other neural network based Irish music generators, we found no GANs which successfully generated music. These other neural networks use a prediction based approach to generate music. Unlike them, GANs could truly generate music from scratch.
 							GANs have worked well with pictures, but to our knowledge there has not been a successful attempt to generate music using GANs. Also, to our knowledge, no one has presented the idea of organizing music like a picture, which makes our encoding unique. </p>
 
 							<ul class="actions">
-								<li><a href="#bg" class="button scrolly">Background Information</a></li>
+								<li><a href="#irish" class="button scrolly">Irish Music</a></li>
 							</ul>
 						</div>
 
 					</section>
 
-				<!-- Background and Related Works -->
-					<section id="bg" class="wrapper style3 fullscreen fade-up">
+				<!-- Irish Music -->
+					<section id="irish" class="wrapper style3 fullscreen fade-up">
 						<div class="inner">
-							<h2>Background Information</h2>
-							<p> <span class="image left"><img src="images/harp.jpg" alt="Man Playing an Irish Harp"/> </span> Irish music, as one of the primary influences on traditional Newfoundland music, tends toward straightforward melodies with a fixed format.
-								Irish traditional music includes many kinds of songs, including drinking songs, ballads and laments.
-								It is a style intended to be played with a single instrument by amateur musicians, resulting in notation that is simple and easy to follow.
-								Due to its' simplicity, Irish music can be represented easily using ABC notation. ABC Notation is a fairly robust notational system that enables people to write sheet music using only ASCII characters.
-								These unique qualities are the primary motivation for choosing Irish music as our target.
+							<h2>Irish Music</h2>
+							<div class="image align-center fit">
+								<figure>
+								<img src="images/harp.jpg" alt="Man Playing an Irish Harp"/>
+									<figcaption>Photo by <a href="https://unsplash.com/photos/dFncsABvjDQ?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText" target="_blank">Vicente Veras </a> on Unsplash</figcaption>
+								</figure>
+								</div>
+							<p>Typically, when someone is talking about Irish music, they mean traditional Irish music,
+								or Irish folk music. Defining Irish music can be difficult because of the vague
+								definition of folk music, and determining the music's origin. Some define traditional
+								music as "old songs, with no known to composers" or as a piece which has accumulated cultural value
+								by being passed down through the generations.
+							</p>
+						    <p> We have three main reasons for choosing to use Irish music:
+								<ol>
+									<li>
+										Even with possible cultural influence, Irish music tends to be distinctive with a fairly simple rhythmic structure and a consistent form between pieces.
+									</li>
+									<li>
+										Newfoundland culture has been heavily influenced by Irish immigration, as can be seen in the language and music.
+									</li>
+									<li>
+										An abundance of Irish music exists online already in ABC Notation, which eliminates the need to transcribe music.
+									</li>
+
+								</ol>
+							<p> For our purposes, we effectively define Irish music as something that the typical person, with little to no musical training,
+								would believe originated in Ireland many years ago, or, a tune that one would expect to be included with other
+								traditional Irish tunes, possibly being played in a pub or a relaxed setting among a group of musicians.
+								In this sense, indistinguishability of the generated tune from other genuine Irish pieces is the key element we're striving for in our output.
     						</p>
 
-							 <p> <span class="image right"><img src="images/gan.png" alt="" /></span> An Artificial Neural Network, or ANN, is based on a collection of connected units called nodes, which
+							<ul class="actions">
+								<li><a href="#gan" class="button scrolly">GAN</a></li>
+							</ul>
+						</div>
+					</section>
+
+				<!-- Neural Networks -->
+					<section id="gan" class="wrapper style1 fullscreen fade-up">
+						<div class="inner">
+							<h2>Generative Adversarial Network</h2>
+							<div class="image align-center fit">
+								<figure>
+									<img src="images/gan.png" alt="Generative Adversarial Network Process"/>
+									<figcaption> visualizing a generative adversarial network </figcaption>
+								</figure>
+
+							</div>
+
+							 <p> An Artificial Neural Network, or ANN, is based on a collection of connected units called nodes, which
 								can be loosely compared to neurons in the human brain. There are various types of ANNs, many of which have been successfully used to classify,
 								predict, and generate different types of data.
 								A Generative Adversarial Network, or a GAN, is an ANN consisting of a Generator
@@ -81,6 +130,10 @@
 								like a detective. After being trained, the Generator can be used
 								to create original ‘art’.
 							</p>
+							<p>
+								The GAN has been structured to take advantage of the features that have been observed in the image forms of the Irish tunes in the training dataset.
+								We opted for a Deconvolutional GAN since they are renowned for performing well on images, and making training a lot more stable.
+							</p>
 
 							<ul class="actions">
 								<li><a href="#approach" class="button scrolly">Our Approach</a></li>
@@ -88,26 +141,31 @@
 						</div>
 					</section>
 
+
 				<!-- Approach -->
 					<section id="approach" class="wrapper style2 fullscreen fade-up">
 						<div class="inner">
 							<h2>Our Approach</h2>
-							<p>We hope to use the distinctive structure of Irish tunes to make them suitable for GAN-based music generation. Our main idea is to regard an Irish melody as a fixed-size object with cross-references among its parts: “music as a picture” view. The two key components of this project are: </p>
-							<div class="col-6 col-12-medium">
-								<span class="image right"><img src="images/process.png" alt="" /></span>
-								<ol>
-									<li>Preprocessing:</li>
-									<ul>
-										<li>Creating a well-defined format for music encoding suitable for GANs</li>
-										<li>Representing “vertical” dependencies in the tunes</li>
-									</ul>
-									<li>Modifying GANs for improved performance via:</li>
-									<ul>
-										<li>Statistical “Bagging” and “Boosting” to mimic the full input distribution</li>
-										<li>Modifying training rate to avoid “Mode Collapse”</li>
-									</ul>
-								</ol>
+							<div class="image align-center fit">
+								<figure>
+									<img src="images/process.png" alt="Vectorizing Process to Generate Music" height="400"/>
+									<figcaption> our overall process of generating Irish music</figcaption>
+								</figure>
 							</div>
+
+							<p>We hope to use the distinctive structure of Irish tunes to make them suitable for GAN-based music generation. Our main idea is to regard an Irish melody as a fixed-size object with cross-references among its parts: “music as a picture” view. The two key components of this project are: </p>
+								<ol>
+								<li>Preprocessing:</li>
+								<ul>
+									<li>Creating a well-defined format for music encoding suitable for GANs</li>
+									<li>Representing “vertical” dependencies in the tunes</li>
+								</ul>
+								<li>Modifying GANs for improved performance via:</li>
+								<ul>
+									<li>Statistical “Bagging” and “Boosting” to mimic the full input distribution</li>
+									<li>Modifying training rate to avoid “Mode Collapse”</li>
+								</ul>
+							</ol>
 							<ul class="actions">
 								<li><a href="#results" class="button scrolly">Results</a></li>
 							</ul>
@@ -120,10 +178,16 @@
 							<h2>Results</h2>
 							<p>Check back here for more findings soon. Here are some images generated while coming up with our Music as a Picture view. Our code and interesting findings and results will be uploaded here as well as to an online repository for public access
         					<a href="https://github.com/vin-nag/GANs-n-reels" target="_blank">here.</a></p>
-							<div class="box alt">
-								<div class="row gtr-uniform">
-									<div class="col-6 col-12"><span class="image fit"><img src="images/vectorized%20image.png" alt="" /></span></div>
-								</div>
+							<div class="image align-center fit">
+								<figure>
+									<img src="images/vectorized%20image.png" alt="Vectorized Images" height="500"/>
+									<figcaption>visualizing music as a structured picture</figcaption>
+								</figure>
+								<figure>
+									<img src="images/song%20type.png" alt="Song Types" height="500"/>
+									<figcaption>song types from our dataset</figcaption>
+								</figure>
+
 							</div>
 
 							<ul class="actions">
@@ -149,7 +213,7 @@
 							</section>
 
 							<section>
-								<a href="#" class="image"><img src="images/and.png" alt="Robert Bishop" data-position="center center" /></a>
+								<a href="#" class="image"><img src="images/generic.jpg" alt="Robert Bishop" data-position="center center" /></a>
 								<div class="content">
 									<div class="inner">
 										<h2>Robert Bishop</h2>
@@ -162,7 +226,7 @@
 							</section>
 
 							<section>
-								<a href="#" class="image"><img src="images/and.png" alt="Mitchell Billard" data-position="center center" /></a>
+								<a href="#" class="image"><img src="images/generic.jpg" alt="Mitchell Billard" data-position="center center" /></a>
 								<div class="content">
 									<div class="inner">
 										<h2>Mitchell Billard</h2>
@@ -188,7 +252,7 @@
 							</section>
 
 							<section>
-								<a href="#" class="image"><img src="images/and.png" alt="Caleb Graves" data-position="center center" /></a>
+								<a href="#" class="image"><img src="images/generic.jpg" alt="Caleb Graves" data-position="center center" /></a>
 								<div class="content">
 									<div class="inner">
 										<h2>Caleb Graves</h2>
@@ -234,7 +298,7 @@
 			<footer id="footer" class="wrapper style1-alt">
 				<div class="inner">
 					<ul class="menu">
-						<li>© Untitled. All rights reserved.</li><li>Design: <a href="http://html5up.net/">HTML5 UP</a></li>
+						<li>© GANs and Reels. All rights reserved.</li><li>Design: <a href="http://html5up.net/">Hyperspace from HTML5 UP</a></li>
 					</ul>
 				</div>
 			</footer>
