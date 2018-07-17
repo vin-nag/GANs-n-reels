@@ -23,45 +23,6 @@ number_notes = {
     0: 'z'
 }
 
-
-def condenser(pitches, held):
-    x = 0
-    master = []
-    lst = list()
-    while x < len(pitches):
-        lst.append(pitches[x])
-        x += 1
-        if x == len(pitches) or held[x] == 1:
-            master.append(lst)
-            lst = []
-
-    out = ''
-    for x in master:
-        prepend = ''
-        append = ''
-        hold = ''
-        num = x[0]
-        if not (num == 0 or (60 <= num <= 83)):
-            if num > 83:
-                mult = (num-72)//12
-                append = '\'' * mult
-                num = num - (12 * mult)
-            else: # x[0] < 60
-                mult = ((num-60)//12) * -1
-                append = ',' * mult
-                num = num + (12 * mult)
-
-        if num not in number_notes:
-            num = num - 1
-            prepend = '^'
-
-        char = number_notes[num]
-
-        if len(x) != 1: hold = str(len(x))
-        out += prepend + char + append + hold
-    return out
-
-
 class Decoder():
 
     def __init__(self, time='1/48', key='Cmaj'):
@@ -119,6 +80,85 @@ class Decoder():
         return
 
 
+def convert_note_list(lst):
+    out = ''
+    for x in lst:
+        prepend = ''
+        append = ''
+        hold = ''
+        num = x[0]
+        if not (num == 0 or (60 <= num <= 83)):
+            if num > 83:
+                mult = (num - 72) // 12
+                append = '\'' * mult
+                num = num - (12 * mult)
+            else:  # x[0] < 60
+                mult = ((num - 60) // 12) * -1
+                append = ',' * mult
+                num = num + (12 * mult)
+
+        if num not in number_notes:
+            num = num - 1
+            prepend = '^'
+
+        char = number_notes[num]
+
+        if len(x) != 1: hold = str(len(x))
+        out += prepend + char + append + hold
+    return out
+
+
+def decode_single_vector(fname):
+    fname = '../../../Data/Vectors/' + fname
+    array = np.load(fname)
+
+    def decode_song(vec):
+        dur = [vec[0][0]]
+        master = []
+        for x in vec:
+            for y in x:
+                if y == dur[0]:
+                    dur.append(y)
+                else:
+                    master.append(dur)
+                    dur = [y]
+        return master
+
+    songs = dict()
+    c = 0
+    for x in array:
+        tune = decode_song(x)
+        songs[c] = convert_note_list(tune)
+        c += 1
+    return songs
+
+
+def decode_dual_vector(pitch_name, held_name):
+    pitches = np.load('../../../Data/Vectors/' + pitch_name)
+    held = np.load('../../../Data/Vectors/' + held_name)
+
+    # TODO - Finish
+
+    def decode_song(pitches, held):
+        x = 0
+        master = []
+        lst = list()
+        while x < len(pitches):
+            lst.append(pitches[x])
+            x += 1
+            if x == len(pitches) or held[x] == 1:
+                master.append(lst)
+                lst = []
+
+        return master
+
+    songs = dict()
+    for c in range(pitches.shape[0]):
+        tune = decode_song(pitches[c], held[c])
+        songs[c] = convert_note_list(tune)
+    return songs
+
+
 if __name__ == '__main__':
     drowsy_maggie = '''|:E2BE dEBE|E2BE AFDF|E2BE dEBE|1 BABc dAFD:|2 BABc dAFA||
                     |:d2fd cdec|defg afge|1 d2fd c2ec|BABc dAFA:|2 afge fdec|BABc dAFA||
@@ -128,4 +168,21 @@ if __name__ == '__main__':
     decode = Decoder(time='1/16')
 
     from src.Model.Tunes_16th_V2 import tunes
-    decode.play(tunes[18])
+
+    # decode.play(tunes[18])
+    generated = decode_single_vector('generated_samples.npy')
+
+    print(generated)
+
+    for x in range(20):
+        print('Playing tune #{}'.format(x))
+        print(generated[x])
+        decode.play(generated[x] + 'z32')
+        print('Next...\n')
+
+    # 6
+    # 8
+    # 9 - I hear a motif!
+    # 10 - Did I hear Korobeiniki?
+    # 14 - I feel like there's something deeper here.
+    # 16 - Another motif.
