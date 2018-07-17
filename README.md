@@ -1,7 +1,12 @@
-# GANs and Reels
+# GANs and Reels #
 *Creating Music Using a Generative Adversarial Network*
 
-Billard, Mitchell; Bishop, Robert; Elsisy, Moustafa; Graves, Caleb; Dr. Kolokolova, Antonina; Nagisetty, Vineel; and Northcott, Zachary: all affiliated with Memorial University of Newfoundland
+By Billard, Mitchell; Bishop, Robert; Elsisy, Moustafa; Graves, Caleb; Dr. Kolokolova, Antonina; Nagisetty, Vineel; and Northcott, Zachary: all affiliated with Memorial University of Newfoundland
+
+## Table of Contents
+* Introduction
+* Usage
+* Report
 
 ## Introduction:
 Our research aims to discover if successful AI image generative models can also be used to generate music.  We plan to use a Deconvolutional Generative Adversarial Network, a particular type of Artificial Neural Network, in an attempt to generate Irish music.
