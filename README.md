@@ -1,4 +1,5 @@
-# GANs and Reels #
+![.](https://github.com/vin-nag/GANs-n-reels/blob/master/Site/images/title.png "Logo")
+
 *Creating Music Using a Generative Adversarial Network*
 
 By Billard, Mitchell; Bishop, Robert; Elsisy, Moustafa; Graves, Caleb; Dr. Kolokolova, Antonina; Nagisetty, Vineel; and Northcott, Zachary: all affiliated with Memorial University of Newfoundland
