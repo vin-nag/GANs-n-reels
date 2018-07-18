@@ -184,6 +184,8 @@ flat_order = 'BEADGCF'
 
 
 def get_sharps_or_flats(key):
+    # TODO - Fix the fact that sharp or flat keys will be missed.
+
     tonic = notes_to_num[key[0]]
     mode = modes[key[1:]]
     relative = num_to_notes[(tonic - mode) % 12]

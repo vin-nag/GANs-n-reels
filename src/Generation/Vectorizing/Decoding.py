@@ -2,8 +2,17 @@
 from music21 import converter
 from music21 import instrument
 from music21.midi.realtime import StreamPlayer
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+
+VECTOR_DIR = '../../../Data/Vectors/'
+
+
+def load_vector(fname):
+    fname = VECTOR_DIR + fname
+    array = np.load(fname)
+    return array
 
 number_notes = {
     60: 'C',
@@ -53,7 +62,7 @@ class Decoder():
     def play_from_vector(self, vec):
         self.set_key('Cmaj')
         self.set_time('1/48')
-        abc = condenser(list(vec['note']), list(vec['timing']))
+        # TODO - Reconfigure the abc generator
         self.play(abc)
 
     def play(self, abc):
@@ -108,9 +117,32 @@ def convert_note_list(lst):
     return out
 
 
-def decode_single_vector(fname):
-    fname = '../../../Data/Vectors/' + fname
-    array = np.load(fname)
+def pitches_to_img(songs, numcols=3, out='bars.png'):
+    """
+    Takes an array of arrays of size 16,n*16 and plots it in 3 configurations
+    """
+    f, axs = plt.subplots(len(songs), numcols, figsize=(10, len(songs) * 2))
+    plt.tight_layout()
+    for num, song in enumerate(songs):
+        img = song[:16]
+        width = img.shape[1]
+        index = num * numcols + 1
+        plt.subplot(len(songs), 3, index)
+        plt.axis('off')
+        plt.title("1 bar per line", fontsize=10)
+        plt.matshow(img.reshape(16, width), cmap='gray', interpolation='nearest', fignum=0, aspect="auto")
+        plt.subplot(len(songs), 3, index + 1)
+        plt.axis('off')
+        plt.title("2 bars per line", fontsize=10)
+        plt.matshow(img.reshape(8, width*2), cmap='gray', interpolation='nearest', fignum=0, aspect="auto")
+        plt.subplot(len(songs), 3, index + 2)
+        plt.axis('off')
+        plt.title("4 bars per line", fontsize=10)
+        plt.matshow(img.reshape(4, width*4), cmap='gray', interpolation='nearest', fignum=0, aspect="auto")
+    plt.savefig('../../../Data/Images/' + out)
+
+
+def decode_single_vector(array):
 
     def decode_song(vec):
         dur = [vec[0][0]]
@@ -133,10 +165,7 @@ def decode_single_vector(fname):
     return songs
 
 
-def decode_dual_vector(pitch_name, held_name):
-    pitches = np.load('../../../Data/Vectors/' + pitch_name)
-    held = np.load('../../../Data/Vectors/' + held_name)
-
+def decode_dual_vector(pitches, held):
     # TODO - Finish
 
     def decode_song(pitches, held):
@@ -165,24 +194,23 @@ if __name__ == '__main__':
                     |:dBfB dBfB|cAeA cAeA|1 dBfB dBfB|defg aece:|2 defg aecA|BABc dAFA||
                     |:dffe dfBf|ceed ceAe|1 dffe defg|a2ag aece:|2 af=ge fdec|BABc dAFD||'''
 
-    decode = Decoder(time='1/16')
+    decode = Decoder(time='1/12')
 
     from src.Model.Tunes_16th_V2 import tunes
 
     # decode.play(tunes[18])
-    generated = decode_single_vector('generated_samples.npy')
 
-    print(generated)
+    generated = load_vector('generated_samples.npy')
+    # pitches_to_img(generated)
+    generated = decode_single_vector(generated)
+
+
+
+    decode.play('C16')
 
     for x in range(20):
         print('Playing tune #{}'.format(x))
         print(generated[x])
-        decode.play(generated[x] + 'z32')
+        decode.play(generated[x] + 'z12A')
         print('Next...\n')
 
-    # 6
-    # 8
-    # 9 - I hear a motif!
-    # 10 - Did I hear Korobeiniki?
-    # 14 - I feel like there's something deeper here.
-    # 16 - Another motif.
