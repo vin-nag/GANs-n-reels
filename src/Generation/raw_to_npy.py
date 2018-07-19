@@ -80,7 +80,6 @@ def raw_abc_to_npy_file():
     tunes = Vectorizer.vectorize_frame(tunes, pad_bars=True, bar_subdivision=16)
 
     print("Size of Initial Frame: {}".format(len(tunes.index)))
-    tunes.head()
     tunes_shaped = tunes[[len(tune.shape)==2 for tune in tunes.notes]].copy()
     print("Size of Cleaned Frame: {}".format(len(tunes_shaped.index)))
     tunes_shaped.reset_index(drop=True, inplace=True)
