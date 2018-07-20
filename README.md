@@ -7,7 +7,7 @@ By Billard, Mitchell; Bishop, Robert; Elsisy, Moustafa; Graves, Caleb; Dr. Kolok
 ## Table of Contents
 * Introduction
 * Usage
-* Report
+* More Info
 
 ## Introduction:
 Our research aims to discover if successful AI image generative models can also be used to generate music.  We plan to use a Deconvolutional Generative Adversarial Network, a particular type of Artificial Neural Network, in an attempt to generate Irish music.
@@ -31,8 +31,10 @@ We hope to use the distinctive structure of Irish tunes to make them suitable fo
  ### Reproduce Results:
  * To reproduce the results shown in the report, please run the notebook file `Ensemble.ipynb` which is found in the `Documentation/` directory.
  
- ## Report
-The abstract report for this project is found [here](https://github.com/vin-nag/GANs-n-reels/blob/master/Documentation/GANs%20and%20Reels_%20Abstract%20for%20CUCSC%202018.pdf).
+ ## More Info
+- More information is found [here](http://www.cs.mun.ca/~kol/GANs-n-reels/).
+- The abstract report for this project is found [here](https://github.com/vin-nag/GANs-n-reels/blob/master/Documentation/GANs%20and%20Reels_%20Abstract%20for%20CUCSC%202018.pdf).
+
 
  
  
