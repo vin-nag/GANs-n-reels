@@ -7,3 +7,6 @@ def demo_helper(vec):
     abc_dic = Decoding.decode_single_vector(vec)
     decoder.set_time('1/16')
     decoder.play_from_dict(abc_dic[0])
+
+if __name__ == '__main__':
+    pass
