@@ -4,6 +4,7 @@ from src.Generation.Vectorizing import Vectorizer
 import os
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 # Flag for whether to update the Tunes_raw.py file from the session's github.
@@ -11,7 +12,7 @@ import numpy as np
 UPDATE_RAW = False
 
 # The files to write to.
-FOLDER_NAME = '../../Data'
+FOLDER_NAME = '../Data'
 ABC_OUT = '/Clean/'
 STATS_OUT = '/Statistics/'
 NPY_OUT = '/Vectors/'
@@ -61,7 +62,7 @@ def raw_to_dict(types=None, meters=None, modes=None, update=False):
     return tunes
 
 
-def raw_abc_to_npy_file():
+def raw_abc_to_npy_file(update=False):
     make_folder(FOLDER_NAME)
     make_folder(FOLDER_NAME + ABC_OUT)
     make_folder(FOLDER_NAME + STATS_OUT)
@@ -69,7 +70,7 @@ def raw_abc_to_npy_file():
 
     print('Starting abc cleaning...')
     # TODO - Using the dictionary provided by the raw_to_dict function causes the numpy array to throw an error.
-    tunes = raw_to_dict(update=UPDATE_RAW, types=[], meters=['4/4'], modes=[])
+    tunes = raw_to_dict(update=update, types=[], meters=['4/4'], modes=[])
 
     print('Finished cleaning abc strings.')
     print('Starting vectorization process.')
@@ -85,15 +86,22 @@ def raw_abc_to_npy_file():
     tunes_shaped.reset_index(drop=True, inplace=True)
     print('\n - - - - - - - Table Data - - - - - - - \n')
     print(tunes_shaped.head()['notes'])
-    '''
-    for x in tunes_shaped.head()['notes']:
-        print('Tune')
-        for y in x: print(y)
-        print()
-    '''
+    print(" ")
+    print("Random Tune Sample ")
+    plt.matshow(tunes['notes'][0].T, cmap=plt.get_cmap('Greys'), fignum=1)
+    plt.show()
+    print(" ")
+    #for x in tunes_shaped.head()['notes']:
+    #    print('Tune')
+    #    for y in x: print(y)
+    #        #plt.matshow(y)
+    #    print()
+
 
     np.save(FOLDER_NAME + NPY_OUT + FILE_NAME + '_Notes.npy', tunes_shaped.notes.values)
     np.save(FOLDER_NAME + NPY_OUT + FILE_NAME + '_Time.npy', tunes_shaped.timing.values)
+
+    print("finished entire process")
 
 
 if __name__ == '__main__':

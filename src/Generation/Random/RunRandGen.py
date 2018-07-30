@@ -9,5 +9,5 @@ gen = RandomSongGen.RandomGenerator(2)
 # Input the desired amount of songs to generate
 songs = gen.generateSongs(5)
 
-#for x in songs:
-    #print(songs[x])
+for x in songs:
+    print(songs[x])

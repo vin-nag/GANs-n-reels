@@ -1,20 +1,12 @@
 # Author: Caleb Graves
 from music21 import converter
 from music21 import instrument
+from music21 import graph
 from music21.midi.realtime import StreamPlayer
-import matplotlib.pyplot as plt
+# import matplotlib as plt
 import pandas as pd
 import numpy as np
-import random
-
-VECTOR_DIR = '../../../Data/Vectors/'
-
-
-def load_vector(fname):
-    fname = VECTOR_DIR + fname
-    array = np.load(fname)
-    return array
-
+import matplotlib.pyplot as plt
 
 number_notes = {
     60: 'C',
@@ -34,14 +26,16 @@ number_notes = {
     0: 'z'
 }
 
+class Decoder():
 
-class Decoder:
-    """
-    A class which helps control the variables for playing the music.
-    """
-    def __init__(self, time='1/48', key='Cmaj'):
+    def __init__(self, time='1/12', key='Cmaj', presentation=False):
+
         self.time = time
         self.key = key
+        self.presentation = presentation
+
+        if(self.presentation):
+            print("Decoder Object Created")
 
     def gen_header(self):
         header = '''X: 1\n
@@ -58,33 +52,15 @@ class Decoder:
     def set_time(self, time):
         self.time = time
 
-    def play_from_dict(self, dic, time='1/8'):
-        """
-        Plays a song given the dictionary.
-        :param dic: The tune as a dictionary
-        :param time: ABC L: field; Default -> '1/8'
-        :return: None. Plays the song.
-        """
+    def play_from_dict(self, dic):
         self.set_key(dic['mode'])
-        self.set_time(time)
+        self.set_time('1/8')
         self.play(dic['abc'])
 
-    def play_from_single_vector(self, vec, time='1/16'):
-        """
-        Plays a song given the vector
-        :param vec: The tune as a 2D array
-        :param time: ABC 'L:' field; Default -> '1/16'
-        :return: None. Plays the song.
-        """
+    def play_from_vector(self, vec):
         self.set_key('Cmaj')
-        self.set_time(time)
-        abc = decode_single_vector([vec])[0]
-        self.play(abc)
-
-    def play_from_dual_vector(self, vec, time='1/48'):
-        self.set_key('Cmaj')
-        self.set_time(time)
-        # TODO - Reconfigure the abc generator
+        self.set_time('1/48')
+        abc = condenser(list(vec['note']), list(vec['timing']))
         self.play(abc)
 
     def play(self, abc):
@@ -98,9 +74,8 @@ class Decoder:
         abc = self.gen_header() + abc
 
         # convert abc format to stream object
-        tune = converter.parseData(abc, format='abc')
+        tune = converter.parse(abc, format='abc')
 
-        # add harp instrument
         for p in tune.parts:
             p.insert(0, instrument.Harp())
 
@@ -112,11 +87,6 @@ class Decoder:
 
 
 def convert_note_list(lst):
-    """
-    Converts a vectorized tune to ABC
-    :param lst: The list of bars in the tune
-    :return: The ABC string
-    """
     out = ''
     for x in lst:
         prepend = ''
@@ -144,41 +114,20 @@ def convert_note_list(lst):
     return out
 
 
-def pitches_to_img(songs, numcols=3, out='bars.png'):
-    """
-    Takes an array of vectorized tunes and return an image representation of them. 
-    :param songs: The 3D array of songs.
-    :param numcols: Number of columns; Default -> 3
-    :param out: Name of output file; Default -> 'bars.png'
-    :return: None. Saves an image to disk.
-    """
-    f, axs = plt.subplots(len(songs), numcols, figsize=(10, len(songs) * 2))
-    plt.tight_layout()
-    for num, song in enumerate(songs):
-        img = song[:16]
-        width = img.shape[1]
-        index = num * numcols + 1
-        plt.subplot(len(songs), numcols, index)
-        plt.axis('off')
-        plt.title("1 bar per line", fontsize=10)
-        plt.matshow(img.reshape(16, width), cmap='gray', interpolation='nearest', fignum=0, aspect="auto")
-        plt.subplot(len(songs), numcols, index + 1)
-        plt.axis('off')
-        plt.title("2 bars per line", fontsize=10)
-        plt.matshow(img.reshape(8, width*2), cmap='gray', interpolation='nearest', fignum=0, aspect="auto")
-        plt.subplot(len(songs), numcols, index + 2)
-        plt.axis('off')
-        plt.title("4 bars per line", fontsize=10)
-        plt.matshow(img.reshape(4, width*4), cmap='gray', interpolation='nearest', fignum=0, aspect="auto")
-    plt.savefig('../../../Data/Images/' + out)
+def decode_single_vector(fname, num=0, presentation=False):
 
+    fname = '../Data/Vectors/' + fname
+    array = np.load(fname)
 
-def decode_single_vector(array):
-    """
-    Takes an array of tunes in vectorized form and returns a dictionary of abc strings.
-    :param array: A 3 dimensional array of pieces, in the form pieces[tune][bar]
-    :return: A dictionary of abc strings.
-    """
+    if (presentation):
+        print("Loading Vector Results from GAN...")
+        print(" ")
+        print("Selected Vector Generated")
+        print(array[num])
+        print(" ")
+        print("Image of the Vector")
+        plt.matshow(array[0].T, cmap=plt.get_cmap('Greys'), fignum=1)
+        plt.show()
 
     def decode_song(vec):
         dur = [vec[0][0]]
@@ -190,6 +139,8 @@ def decode_single_vector(array):
                 else:
                     master.append(dur)
                     dur = [y]
+
+
         return master
 
     songs = dict()
@@ -198,10 +149,65 @@ def decode_single_vector(array):
         tune = decode_song(x)
         songs[c] = convert_note_list(tune)
         c += 1
+
+    if(presentation):
+        print("Decoding Vectors to ABC format...")
+        print(" ")
+        print("ABC Notation Generated")
+        print(songs[num])
+        print(" ")
+
+    return songs
+
+def decode_single_vector_no_file(array, num=0, presentation=False):
+
+    if (presentation):
+        print("Loading Vector Results from GAN...")
+        print(" ")
+        print("Selected Vector Generated")
+        print(array[num])
+        print(" ")
+        print("Image of the Vector")
+        plt.matshow(array[0].T, cmap=plt.get_cmap('Greys'), fignum=1)
+        plt.show()
+
+    def decode_song(vec):
+        dur = [vec[0][0]]
+        master = []
+        for x in vec:
+            for y in x:
+                if y == dur[0]:
+                    dur.append(y)
+                else:
+                    master.append(dur)
+                    dur = [y]
+
+
+        return master
+
+    songs = dict()
+    c = 0
+    for x in array:
+        tune = decode_song(x)
+        songs[c] = convert_note_list(tune)
+        c += 1
+
+    if(presentation):
+        print("Decoding Vectors to ABC format...")
+        print(" ")
+        print("ABC Notation Generated")
+        print(songs[num])
+        print(" ")
+
     return songs
 
 
-def decode_dual_vector(pitches, held):
+
+
+def decode_dual_vector(pitch_name, held_name):
+    pitches = np.load('../../../Data/Vectors/' + pitch_name)
+    held = np.load('../../../Data/Vectors/' + held_name)
+
     # TODO - Finish
 
     def decode_song(pitches, held):
@@ -230,23 +236,27 @@ if __name__ == '__main__':
                     |:dBfB dBfB|cAeA cAeA|1 dBfB dBfB|defg aece:|2 defg aecA|BABc dAFA||
                     |:dffe dfBf|ceed ceAe|1 dffe defg|a2ag aece:|2 af=ge fdec|BABc dAFD||'''
 
-    decode = Decoder(time='1/12')
+    decode = Decoder(time='1/8', key="DMaj")
 
     from src.Model.Tunes_16th_V2 import tunes
 
-    # decode.play(tunes[18])
+    decode.play(drowsy_maggie)
 
-    generated = load_vector('generated_samples.npy')
-    # pitches_to_img(generated)
-    generated = decode_single_vector(generated)
+    #generated = decode_single_vector('generated_samples.npy', num=0, presentation=False )
 
+    #print(generated)
 
-
-    decode.play('C16')
-
-    for x in range(20):
+    """
+    for x in range(0,20):
         print('Playing tune #{}'.format(x))
         print(generated[x])
-        decode.play(generated[x] + 'z12A')
+        decode.play(generated[x] + 'z32')
         print('Next...\n')
+    """
 
+    # 6
+    # 8
+    # 9 - I hear a motif!
+    # 10 - Did I hear Korobeiniki?
+    # 14 - I feel like there's something deeper here.
+    # 16 - Another motif.

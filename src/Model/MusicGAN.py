@@ -4,16 +4,18 @@ from keras import models
 from keras.layers.advanced_activations import LeakyReLU
 import numpy as np
 import matplotlib as plt
+import tensorflow
 import pandas as pd
 
 class GAN():
-    def __init__(self, paddedData, data):
+    def __init__(self, paddedData, data, presentation=False):
         self.paddedData = paddedData
         self.img_dim = [4 + 1, 64 + (4 * 2)]  # RHS of sum is padding
         self.channels = 1
         self.img_shape = [*self.img_dim, self.channels]
         self.noise_shape = [100, ]
         self.data = data
+        self.presentation = presentation
 
         self.gloss = []
         self.dloss = []
@@ -40,6 +42,8 @@ class GAN():
         self.combined.compile(loss='binary_crossentropy', optimizer=optimizer)
 
     def build_generator(self, momentum=0.8, alpha_leak=0.2):
+        if(self.presentation):
+            print("Building Generator...")
         noise_shape = self.noise_shape
 
         model = models.Sequential()
@@ -71,6 +75,9 @@ class GAN():
         return models.Model(noise, img)
 
     def build_discriminator(self, alpha_leak=0.2):
+        if (self.presentation):
+            print("Building Generator...")
+
         img_shape = self.img_shape
 
         model = models.Sequential()
@@ -93,6 +100,9 @@ class GAN():
         return models.Model(img, validity)
 
     def train(self, iterations, batch_size=60, sample_interval=750):
+        if (self.presentation):
+            print("Starting GAN Training ...")
+
         X_train = self.paddedData
         halfMaxPitch = (80 + 53) // 2
         pitchRange = 80 - halfMaxPitch
@@ -116,9 +126,14 @@ class GAN():
                     discriminator_loss[0],
                     100 * discriminator_loss[1],
                     generator_loss))
-                #self.sample_images()
 
-        # self.plotLossHistory()
+
+                if (self.presentation):
+                    print("Sample Images")
+                    self.sample_images()
+
+        if self.presentation:
+            self.plotLossHistory()
 
     def train_discriminator(self, X_real, batch_size):
         half_batch = batch_size // 2

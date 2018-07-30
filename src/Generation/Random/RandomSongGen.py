@@ -246,6 +246,6 @@ if __name__ == '__main__':
     player = Decoder()
 
     gen = RandomGenerator(2)
-    song = gen.generateSongs(1)
+    song = gen.generateSongs(2)
     print(song)
     player.play(song[0]['abc'])

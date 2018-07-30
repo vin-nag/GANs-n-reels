@@ -477,7 +477,8 @@ def remove_repeats(abc, tune_id):
     # Normalize the barline grammar, for future processing
     while ']' in cleaned: cleaned = cleaned.replace(']', '|')
     while '||' in cleaned: cleaned = cleaned.replace('||', '|')
-    if cleaned[0] == '|': cleaned = cleaned[1:]
+    if cleaned:
+        if cleaned[0] == '|': cleaned = cleaned[1:]
 
     # Condense bars which were improperly split
     cleaned = repair_bars(cleaned)
