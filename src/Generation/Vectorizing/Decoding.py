@@ -28,7 +28,7 @@ number_notes = {
 
 class Decoder():
 
-    def __init__(self, time='1/12', key='Cmaj', presentation=False):
+    def __init__(self, time='1/8', key='Cmaj', presentation=False):
 
         self.time = time
         self.key = key
