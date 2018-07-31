@@ -2,7 +2,6 @@
 
 # A random ABC generator
 
-import math
 import random
 
 class RandomGenerator:
@@ -241,7 +240,7 @@ class RandomGenerator:
 
 
 if __name__ == '__main__':
-    from src.Generation.Vectorizing.Decoding import Decoder
+    from src.Generation.Decoding.Decoding import Decoder
 
     player = Decoder()
 

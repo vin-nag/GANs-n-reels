@@ -3,7 +3,7 @@ import numpy as np
 from Data.Clean.Common_Time import tunes
 from src.Generation.Cleaning.Cleaner import clean
 from src.Generation.Vectorizing import Vectorizer
-from src.Generation.Vectorizing import Decoding
+from src.Generation.Decoding import Decoding
 
 #setting = 12410
 setting = 13542
@@ -21,7 +21,7 @@ print(tune)
 tune = np.array(tune)
 print(tune)
 print(tune[0].shape)
-Decoding.pitches_to_img(tune, out='Tune_'+str(setting))
+Decoding.pitches_to_img(tune, out='Tune_' + str(setting))
 
 if __name__ == '__main__':
     pass

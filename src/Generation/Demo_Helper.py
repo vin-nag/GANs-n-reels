@@ -1,4 +1,4 @@
-from src.Generation.Vectorizing import Decoding
+from src.Generation.Decoding import Decoding
 
 
 def demo_helper(vec):
