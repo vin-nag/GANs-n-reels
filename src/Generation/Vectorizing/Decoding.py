@@ -118,6 +118,10 @@ class Decoder:
 
             # play music using pygame stream player
             player = StreamPlayer(tune)
+            print("Playing tune #{}\nABC:   {}\n".format(num, self.tunes[num]))
+            player.play()
+
+            player = StreamPlayer(converter.parse(self.gen_header() + 'z12C12z12', format='abc'))
             player.play()
         except AccidentalException:
             print(abc)
@@ -192,7 +196,7 @@ class Decoder:
         return cls([], [], tunes, time, key)
 
     @classmethod
-    def from_single_vector(cls, pitches, time='1/16', key='Cmaj', presentation=False):
+    def from_single_vector(cls, pitches, time='1/48', key='Cmaj', presentation=False):
 
         def decode_single_vector(array):
             """
@@ -238,8 +242,16 @@ class Decoder:
             return tunes
 
         if type(pitches) == str: pitches = load_vector(pitches)
+        tunes = decode_single_vector(pitches)
 
-        return cls(pitches, [], decode_single_vector(pitches), time, key)
+        if presentation:
+            print("Sample Image of Vector:")
+            plt.matshow(pitches[0].T, cmap=plt.get_cmap('Greys'), fignum=1)
+            plt.show()
+            print("ABC Notation Sample:")
+            print(tunes[0] + '\n')
+
+        return cls(pitches, [], tunes, time, key)
 
     @classmethod
     def from_double_vector(cls, pitches, timing, time='1/48', key='Cmaj', presentation=False):
@@ -292,6 +304,49 @@ def parse_raw_abc(abc):
     return tune
 
 
+def decode_single_vector_no_file(array, num=0, presentation=False):
+
+    if (presentation):
+        print("Loading Vector Results from GAN...")
+        print(" ")
+        print("Selected Vector Generated")
+        print(array[num])
+        print(" ")
+        print("Image of the Vector")
+        plt.matshow(array[0].T, cmap=plt.get_cmap('Greys'), fignum=1)
+        plt.show()
+
+    def decode_song(vec):
+        dur = [vec[0][0]]
+        master = []
+        for x in vec:
+            for y in x:
+                if y == dur[0]:
+                    dur.append(y)
+                else:
+                    master.append(dur)
+                    dur = [y]
+
+
+        return master
+
+    songs = dict()
+    c = 0
+    for x in array:
+        tune = decode_song(x)
+        songs[c] = convert_note_list(tune)
+        c += 1
+
+    if(presentation):
+        print("Decoding Vectors to ABC format...")
+        print(" ")
+        print("ABC Notation Generated")
+        print(songs[num])
+        print(" ")
+
+    return songs
+
+
 if __name__ == '__main__':
     drowsy_maggie = '''|:E2BE dEBE|E2BE AFDF|E2BE dEBE|1 BABc dAFD:|2 BABc dAFA||
                     |:d2fd cdec|defg afge|1 d2fd c2ec|BABc dAFA:|2 afge fdec|BABc dAFA||
@@ -301,9 +356,16 @@ if __name__ == '__main__':
     rand_tune = """A,A,B,A,A,A,G,G,G,A,B,B,CB,EE|EEAAffeeddBBGGFF|EEFFEEBAGGAAGGGG|ccccdeeeddBBGGAA|ggeeccfeAABBBBFF|ccAAddddddccGGFF|DDEECB,B,B,D,E,B,B,CCCC|B,B,CB,A,A,FFDDDDEEGG|ddcccBGFGGBBFFcd|ddccefggccAGB,CBB|AAAAddfeffBBffAG|AABBBBFFCCB,B,CCCB,|A,A,B,B,B,CEEGGDCFFAA|DDFFDDcBAAGFB,B,cc|cBccaaabfgfgBcee|AAGGEECB,B,B,B,A,CCA,G,"""
 
     # decode = Decoder.from_raw_abc(drowsy_maggie, key='Dmaj')
+    # decode.play()
+
     # decode = Decoder.from_dict({0: {'abc': drowsy_maggie}}, key='Dmaj')
-    decode = Decoder.from_single_vector('generated_notes_July30_V2.npy', time='1/16')
+    # decode.play()
+
 
     # decode = Decoder.from_raw_abc(parse_raw_abc(rand_tune), override=True, time='1/4')
+    # decode.play()
 
-    decode.play_all()
+    decode = Decoder.from_single_vector('generated_notes_July30_V3.npy', time='1/48', presentation=True)
+    #decode.play_all()
+    decode.play(4)
+    decode.play(9)
