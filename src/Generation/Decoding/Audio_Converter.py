@@ -1,5 +1,6 @@
 from midi2audio import FluidSynth
 from pydub import AudioSegment
+import tempfile
 
 # TODO - Save the tune
 default = '../../../Data/Audio/'
@@ -88,7 +89,42 @@ class Converter:
 
     def save_song_from_stream(self):
         # TODO - Use python temp file to save to MIDI
-        self.tune.write('midi', fp=default + 'song_{}.{}'.format(self.num, self.file_type))
+        # ['mid', 'wav', 'flac', 'mp3', 'ogg', 'flv', 'mp4', 'wma', 'aac']
+
+        file_out = default + 'song_{}.{}'.format(self.num, self.out_type)
+
+        if self.out_type == 'mid':
+            self.tune.write('midi', fp=file_out)
+            return
+
+        fs = FluidSynth()
+        temp_midi = tempfile.NamedTemporaryFile()
+        self.tune.write('midi', fp=temp_midi.name)
+        temp_midi.seek(0)
+        if self.out_type == 'wav' or self.out_type == 'flac':
+            fs.midi_to_audio(temp_midi.name, file_out)
+        else:
+            temp_wav = tempfile.NamedTemporaryFile()
+            fs.midi_to_audio(temp_midi.name, temp_wav.name)
+            temp_wav.seek(0)
+
+            with open(temp_wav.name, "rb") as audio:
+                audio_segment = AudioSegment.from_file(audio, format='wav')
+                audio_segment.export(file_out, format=self.out_type)
+
+        temp_midi.close()
+
+        """
+        # create a temporary file and write some data to it
+        >> > fp = tempfile.TemporaryFile()
+        >> > fp.write(b'Hello world!')
+        # read data from file
+        >> > fp.seek(0)
+        >> > fp.read()
+        b'Hello world!'
+        # close the file, it will be removed
+        >> > fp.close()
+        """
 
     def stream_to_midi(self):
         self.tune.write('midi', fp=default + 'song_{}.mid'.format(self.num))
@@ -96,7 +132,8 @@ class Converter:
     def save_song(self):
         if self.is_stream:
             self.save_song_from_stream()
-        self.save_song_from_file()
+        else:
+            self.save_song_from_file()
 
 
 if __name__ == '__main__':
@@ -110,14 +147,4 @@ fs = FluidSynth()
 fs.midi_to_audio('input.mid', 'output.wav')
 fs.midi_to_audio('input.mid', 'output.flac')
 
-wav_version = AudioSegment.from_wav("never_gonna_give_you_up.wav")
-mp3_version = AudioSegment.from_mp3("never_gonna_give_you_up.mp3")
-ogg_version = AudioSegment.from_ogg("never_gonna_give_you_up.ogg")
-flv_version = AudioSegment.from_flv("never_gonna_give_you_up.flv")
-
-mp4_version = AudioSegment.from_file("never_gonna_give_you_up.mp4", "mp4")
-wma_version = AudioSegment.from_file("never_gonna_give_you_up.wma", "wma")
-aac_version = AudioSegment.from_file("never_gonna_give_you_up.aiff", "aac")
-
-awesome.export("mashup.mp3", format="mp3")
 """

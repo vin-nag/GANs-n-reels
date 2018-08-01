@@ -101,12 +101,12 @@ class Decoder:
     def set_time(self, time):
         self.time = time
 
-    def save_tune(self, num):
+    def save_tune(self, num, out='mid'):
         abc = self.gen_header() + self.tunes[num]
         tune = converter.parse(abc, format='abc')
         for p in tune.parts: p.insert(0, instrument.Flute())
-        switch = Audio_Converter.Converter(tune, out_type='mid', num=num)
-        switch.stream_to_midi()
+        switch = Audio_Converter.Converter(tune, out_type=out, num=num)
+        switch.save_song()
 
     def play(self, num=None):
         """
@@ -342,4 +342,5 @@ if __name__ == '__main__':
 
     decode = Decoder.from_single_vector('generated_notes_July30_V3.npy', time='1/48')
     #decode.play_all()
-    decode.test_play_all()
+    # decode.test_play_all()
+    decode.save_tune(1, out='mid')
