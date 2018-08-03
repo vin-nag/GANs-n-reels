@@ -4,6 +4,7 @@ from music21 import converter
 from music21 import instrument
 from music21.midi.realtime import StreamPlayer
 from src.Generation.Decoding import Audio_Converter
+from src.Generation.Vectorizing import Vectorizer as Vec
 import matplotlib.pyplot as plt
 import numpy as np
 import random
@@ -23,23 +24,7 @@ def load_vector(fname):
     return array
 
 
-number_notes = {
-    60: 'C',
-    62: 'D',
-    64: 'E',
-    65: 'F',
-    67: 'G',
-    69: 'A',
-    71: 'B',
-    72: 'c',
-    74: 'd',
-    76: 'e',
-    77: 'f',
-    79: 'g',
-    81: 'a',
-    83: 'b',
-    0: 'z'
-}
+note_numbers = Vec.note_numbers
 
 
 def convert_note_list(lst):
@@ -64,11 +49,11 @@ def convert_note_list(lst):
                 append = ',' * mult
                 num = num + (12 * mult)
 
-        if num not in number_notes:
+        if num not in note_numbers:
             num = num - 1
             prepend = '^'
 
-        char = number_notes[num]
+        char = note_numbers[num]
 
         if len(x) != 1: hold = str(len(x))
         out += prepend + char + append + hold

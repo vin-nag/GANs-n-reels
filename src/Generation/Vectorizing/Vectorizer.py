@@ -12,129 +12,7 @@ NOTE_MULT = BAR_SUBDIVISION // 8  # value to multiply an 8th note by
 PAD_BARS = True
 PAD_METHOD = 1  # 1 is stretch
 
-
-def vectorize_frame(df, bar_subdivision=48, reindex=True, pad_bars=True):
-    """
-    Takes a pandas dataframe and returns it with 2 new frames appended for notes and timing
-    bar_subdivision controls how many 'ticks' a bar is split into
-    :param df: pandas dataframe with an 'abc' column
-    """
-    global BAR_SUBDIVISION, NOTE_MULT, PAD_BARS
-    BAR_SUBDIVISION = bar_subdivision
-    NOTE_MULT = bar_subdivision // 8
-    PAD_BARS = pad_bars
-    df['notes'], df['timing'] = zip(*df.apply(vectorize_abc, axis=1))
-    df['notes'] = df['notes'] + df['mode'].map(transpose_tune)
-    if reindex: df.reset_index(drop=True, inplace=True)
-    return df
-
-
-def vectorize_abc(df):
-    """
-    takes an abc string and returns the note vector and timing vector, split by bars
-    """
-
-    abc_string = df['abc']
-    accs, mod = get_sharps_or_flats(df['mode'])
-    note_out = []
-    time_out = []
-    for bar in split_by_bar(abc_string):
-        note, time = vectorize_bar(bar, accs, mod)
-        note_out.append(note)
-        time_out.append(time)
-    return np.array(note_out), np.array(time_out)
-
-
-def split_by_bar(abc_string):
-    """
-    Takes a string of full ABC notation and splits it into lists representing individual bars
-    """
-    result = abc_string.split('|')
-    return [x for x in result if x != '']
-
-
-'''
-def vectorize_bar(abc_string):
-    """
-    Takes an ABC string of an individual bar and returns that same bar but with BAR_SUBDIVISION notes
-    returns the the string of notes as well as a 'timing vector'
-    """
-    note_out = []
-    time_out = []
-    notes_re = re.compile('([_=^]*[a-gzA-G][,\']*)([\d]*)/?([\d]*)')
-    notes = notes_re.findall(abc_string)
-    for note, num, denom in notes:
-        if num == '':
-            num = 1
-        else:
-            num = int(num)
-        if denom == '':
-            denom = 1
-        else:
-            denom = int(denom)
-        if NOTE_MULT * num / denom % 1 != 0:
-            raise Exception(
-                "{}*{}/{} is not an integer. Your note multiplier is insufficient".format(NOTE_MULT, num, denom))
-            # return np.array(note_out), np.array(time_out)
-        reps = ((NOTE_MULT * num) // denom)
-        note_num = note_to_number(note)
-        note_out += [note_num for n in range(reps)]
-        time = [0] * reps
-        time[0] = 1
-        time_out += time
-    # zero padding
-    if PAD_BARS and len(note_out) != BAR_SUBDIVISION:
-        pad_num = BAR_SUBDIVISION - len(note_out)
-        if len(notes) < 4:
-            note_out += [0 for n in range(pad_num)]
-            time_out += [0 for n in range(pad_num)]
-        else:
-            note_out = [0 for n in range(pad_num)] + note_out
-            note_out = [0 for n in range(pad_num)] + note_out
-    return np.array(note_out), np.array(time_out)
-'''
-
-
-def vectorize_bar(abc_string, accs, mod, pad_bars=True):
-    """
-    Takes an ABC string of an individual bar and returns that same bar but with 48 notes
-    returns the the string of notes as well as a 'timing vector'
-    """
-    note_out = []
-    time_out = []
-    notes_re = re.compile('([_=^]*[a-gzA-G][,\']*)([\d]*)/?([\d]*)')
-    notes = notes_re.findall(abc_string)
-    for note, num, denom in notes:
-        if num == '':
-            num = 1
-        else:
-            num = int(num)
-        if denom == '':
-            denom = 1
-        else:
-            denom = int(denom)
-        if NOTE_MULT * num / denom % 1 != 0:
-            return np.array(note_out), np.array(time_out)
-            raise Exception(
-                "{}*{}/{} is not an integer. Your note multiplier is insufficient".format(NOTE_MULT, num, denom))
-        reps = ((NOTE_MULT * num) // denom)
-        note_num = note_to_number(note, accs, mod)
-        note_out += [note_num for n in range(reps)]
-        time = [0] * reps
-        time[0] = 1
-        time_out += time
-        # zero padding
-    if pad_bars and len(note_out) != BAR_SUBDIVISION:
-        pad_num = BAR_SUBDIVISION - len(note_out)
-        if len(notes) < 4:
-            note_out += [0 for _ in range(pad_num)]
-            time_out += [0 for _ in range(pad_num)]
-        else:
-            note_out = [0 for _ in range(pad_num)] + note_out
-            time_out = [0 for _ in range(pad_num)] + time_out
-    return np.array(note_out), np.array(time_out)
-
-
+# region MUSIC THEORY STRUCTS
 # Dicts for note conversion
 note_numbers = {
     'C': 60,
@@ -181,6 +59,85 @@ flat_order = 'BEADGCF'
 # Down a key: -7 or +5
 
 # key_list index - 5 = number of accidentals, where + is sharps and - is flats.
+# endregion
+
+
+def vectorize_frame(df, bar_subdivision=48, reindex=True, pad_bars=True):
+    """
+    Takes a pandas dataframe and returns it with 2 new frames appended for notes and timing
+    bar_subdivision controls how many 'ticks' a bar is split into
+    :param df: pandas dataframe with an 'abc' column
+    """
+    global BAR_SUBDIVISION, NOTE_MULT, PAD_BARS
+    BAR_SUBDIVISION = bar_subdivision
+    NOTE_MULT = bar_subdivision // 8
+    PAD_BARS = pad_bars
+    df['notes'], df['timing'] = zip(*df.apply(vectorize_abc, axis=1))
+    df['notes'] = df['notes'] + df['mode'].map(transpose_tune)
+    if reindex: df.reset_index(drop=True, inplace=True)
+    return df
+
+
+def vectorize_abc(df):
+    """
+    takes an abc string and returns the note vector and timing vector, split by bars
+    """
+
+    abc_string = df['abc']
+    accs, mod = get_sharps_or_flats(df['mode'])
+    note_out = []
+    time_out = []
+    for bar in split_by_bar(abc_string):
+        note, time = vectorize_bar(bar, accs, mod)
+        note_out.append(note)
+        time_out.append(time)
+    return np.array(note_out), np.array(time_out)
+
+
+def split_by_bar(abc_string):
+    """
+    Takes a string of full ABC notation and splits it into lists representing individual bars
+    """
+    result = abc_string.split('|')
+    return [x for x in result if x != '']
+
+
+def vectorize_bar(abc_string, accs, mod, pad_bars=True):
+    """
+    Takes an ABC string of an individual bar and returns that same bar but with 48 notes
+    returns the the string of notes as well as a 'timing vector'
+    """
+    note_out = []
+    time_out = []
+    notes_re = re.compile('([_=^]*[a-gzA-G][,\']*)([\d]*)/?([\d]*)')
+    notes = notes_re.findall(abc_string)
+    for note, num, denom in notes:
+        if num == '':
+            num = 1
+        else:
+            num = int(num)
+        if denom == '':
+            denom = 1
+        else:
+            denom = int(denom)
+        if NOTE_MULT * num / denom % 1 != 0:
+            return np.array(note_out), np.array(time_out)
+        reps = ((NOTE_MULT * num) // denom)
+        note_num = note_to_number(note, accs, mod)
+        note_out += [note_num for n in range(reps)]
+        time = [0] * reps
+        time[0] = 1
+        time_out += time
+        # zero padding
+    if pad_bars and len(note_out) != BAR_SUBDIVISION:
+        pad_num = BAR_SUBDIVISION - len(note_out)
+        if len(notes) < 4:
+            note_out += [0 for _ in range(pad_num)]
+            time_out += [0 for _ in range(pad_num)]
+        else:
+            note_out = [0 for _ in range(pad_num)] + note_out
+            time_out = [0 for _ in range(pad_num)] + time_out
+    return np.array(note_out), np.array(time_out)
 
 
 def get_sharps_or_flats(key):
