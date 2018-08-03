@@ -14,7 +14,7 @@ PAD_METHOD = 1  # 1 is stretch
 
 # region MUSIC THEORY STRUCTS
 # Dicts for note conversion
-note_numbers = {
+chars_as_num = {
     'C': 60,
     'D': 62,
     'E': 64,
@@ -32,20 +32,20 @@ note_numbers = {
     'z': 0
 }
 
-accidentals = {'_': -1, '=': 0, '^': 1}
-octaves = {',': -12, "'": 12}
+accidental_mods = {'_': -1, '=': 0, '^': 1}
+octave_mods = {',': -12, "'": 12}
 
 
-notes_to_num = {'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3,
+key_to_offset = {'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3,
                 'E': 4, 'Fb': 4, 'E#': 5, 'F': 5, 'F#': 6, 'Gb': 6,
                 'G': 7, 'G#': 8, 'Ab': 8, 'A': 9, 'A#': 10, 'Bb': 10,
                 'B': 11, 'Cb': 11, 'B#': 0}
 
 
-num_to_notes = {0: 'C', 1: 'Db', 2: 'D', 3: 'Eb', 4: 'E', 5: 'F',
-                6: 'F#', 7: 'G', 8: 'Ab', 9: 'A', 10: 'Bb', 11: 'B'}
+offset_to_key = {0: 'C', 1: 'Db', 2: 'D', 3: 'Eb', 4: 'E', 5: 'F',
+                 6: 'F#', 7: 'G', 8: 'Ab', 9: 'A', 10: 'Bb', 11: 'B'}
 
-key_list = ['Db', 'Ab', 'Eb', 'Bb', 'F', 'C', 'G', 'D', 'A', 'E', 'B', 'F#']
+ordered_key_list = ['Db', 'Ab', 'Eb', 'Bb', 'F', 'C', 'G', 'D', 'A', 'E', 'B', 'F#']
 
 
 modes = {'ionian': 0, 'major': 0, 'dorian': 2, 'phrygian': 4, 'lydian': 5,
@@ -73,7 +73,8 @@ def vectorize_frame(df, bar_subdivision=48, reindex=True, pad_bars=True):
     NOTE_MULT = bar_subdivision // 8
     PAD_BARS = pad_bars
     df['notes'], df['timing'] = zip(*df.apply(vectorize_abc, axis=1))
-    df['notes'] = df['notes'] + df['mode'].map(transpose_tune)
+    # TODO - Multiply the spots with 0's by 0, and everything else by 1
+    df['notes'] = (df['notes'] + df['mode'].map(transpose_tune))
     if reindex: df.reset_index(drop=True, inplace=True)
     return df
 
@@ -124,7 +125,7 @@ def vectorize_bar(abc_string, accs, mod, pad_bars=True):
             return np.array(note_out), np.array(time_out)
         reps = ((NOTE_MULT * num) // denom)
         note_num = note_to_number(note, accs, mod)
-        note_out += [note_num for n in range(reps)]
+        note_out += [note_num for _ in range(reps)]
         time = [0] * reps
         time[0] = 1
         time_out += time
@@ -143,11 +144,11 @@ def vectorize_bar(abc_string, accs, mod, pad_bars=True):
 def get_sharps_or_flats(key):
     # TODO - Fix the fact that sharp or flat keys will be missed.
 
-    tonic = notes_to_num[key[0]]
+    tonic = key_to_offset[key[0]]
     mode = modes[key[1:]]
-    relative = num_to_notes[(tonic - mode) % 12]
+    relative = offset_to_key[(tonic - mode) % 12]
 
-    diff = key_list.index(relative) - 5
+    diff = ordered_key_list.index(relative) - 5
 
     if diff > 0:
         return sharp_order[0:diff-1], 1
@@ -158,11 +159,11 @@ def get_sharps_or_flats(key):
 
 
 def transpose_tune(key):
-    tonic = notes_to_num[key[0]]
+    tonic = key_to_offset[key[0]]
     mode = modes[key[1:]]
-    relative = num_to_notes[(tonic - mode) % 12]
+    relative = offset_to_key[(tonic - mode) % 12]
 
-    diff = key_list.index(relative) - 5
+    diff = ordered_key_list.index(relative) - 5
 
     trans_up = (7 * diff) % 12
     trans_down = (5 * diff % 12)
@@ -178,15 +179,15 @@ def note_to_number(abc_note, accs, mod):
     accidental = reg.group(1)
     note = reg.group(2)
     octave = reg.group(3)
-    val = note_numbers[note]
+    val = chars_as_num[note]
     if accidental != '':
         for char in accidental:
-            val += accidentals[char]
+            val += accidental_mods[char]
     else:
         if note.upper() in accs:
             val += mod
     for char in octave:
-        val += octaves[char]
+        val += octave_mods[char]
     return val
 
 

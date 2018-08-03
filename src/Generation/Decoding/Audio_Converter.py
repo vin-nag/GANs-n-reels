@@ -2,7 +2,8 @@ from midi2audio import FluidSynth
 from pydub import AudioSegment
 import tempfile
 
-# TODO - Save the tune
+# TODO - Determine why MIDI saves correctly, but WAVa nd MP3 do not.
+
 default = '../../../Data/Audio/'
 
 

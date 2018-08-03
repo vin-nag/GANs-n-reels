@@ -1,5 +1,5 @@
 from Data.Raw import The_Session_Raw as raw
-from src.Generation.Cleaning import Generate_Stats, Generate_Files
+from src.Generation.Cleaning import Stats, Generate_Files
 from src.Generation.Vectorizing import Vectorizer
 import os
 import pandas as pd
@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 UPDATE_RAW = False
 
 # The files to write to.
-FOLDER_NAME = '../Data'
+FOLDER_NAME = '../../Data'
 ABC_OUT = '/Clean/'
 STATS_OUT = '/Statistics/'
 NPY_OUT = '/Vectors/'
@@ -54,7 +54,6 @@ def raw_to_dict(types=None, meters=None, modes=None, update=False):
     clean = Generate_Files.create_dict_list(raw.tunes, types=types, meters=meters, modes=modes)
 
     # Generate the stats of the cleaned tunes and save them. Has a small check to prevent a file-out error.
-    Generate_Stats.parse_stats(clean, FOLDER_NAME + STATS_OUT + FILE_NAME + '.txt')
     Generate_Files.dicts_to_file(clean, FOLDER_NAME + ABC_OUT + FILE_NAME + '.py')
 
     tunes = dict()
@@ -72,7 +71,7 @@ def raw_abc_to_npy_file(update=False):
     # TODO - Using the dictionary provided by the raw_to_dict function causes the numpy array to throw an error.
     tunes = raw_to_dict(update=update, types=[], meters=['4/4'], modes=[])
 
-    print('Finished cleaning abc strings.')
+    print('Finished abc cleaning.')
     print('Starting vectorization process.')
     from Data.Clean.Common_Time import tunes as tunes_raw
     print('Creating dataframe...')
@@ -87,21 +86,18 @@ def raw_abc_to_npy_file(update=False):
     print('\n - - - - - - - Table Data - - - - - - - \n')
     print(tunes_shaped.head()['notes'])
     print(" ")
-    print("Random Tune Sample ")
+    print("Random Tune Sample: ")
     plt.matshow(tunes['notes'][0].T, cmap=plt.get_cmap('Greys'), fignum=1)
     plt.show()
     print(" ")
-    #for x in tunes_shaped.head()['notes']:
-    #    print('Tune')
-    #    for y in x: print(y)
-    #        #plt.matshow(y)
-    #    print()
-
 
     np.save(FOLDER_NAME + NPY_OUT + FILE_NAME + '_Notes.npy', tunes_shaped.notes.values)
     np.save(FOLDER_NAME + NPY_OUT + FILE_NAME + '_Time.npy', tunes_shaped.timing.values)
 
-    print("finished entire process")
+    print("Generating statistical model of tunes...")
+    stats = Stats.StatsHandler(FILE_NAME)
+    stats.save_stats_to_file()
+    print("Process finished.")
 
 
 if __name__ == '__main__':

@@ -1,6 +1,5 @@
 from datetime import datetime
 
-# TODO - Sort the Data prior to printing
 total = 0
 unique = set()
 family = dict()
@@ -14,10 +13,8 @@ def read_list(tunes):
     global total
 
     def inc(key, master):
-        if key in master:
-            master[key] += 1
-        else:
-            master[key] = 0
+        if key in master: master[key] += 1
+        else: master[key] = 1
 
     for t in tunes:
         unique.add(int(t['tune']))

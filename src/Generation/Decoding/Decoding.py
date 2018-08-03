@@ -24,7 +24,7 @@ def load_vector(fname):
     return array
 
 
-note_numbers = Vec.note_numbers
+num_as_chars = inv_map = {v: k for k, v in Vec.chars_as_num.items()}
 
 
 def convert_note_list(lst):
@@ -35,7 +35,6 @@ def convert_note_list(lst):
     """
     out = ''
     for x in lst:
-        prepend = ''
         append = ''
         hold = ''
         num = x[0]
@@ -49,11 +48,13 @@ def convert_note_list(lst):
                 append = ',' * mult
                 num = num + (12 * mult)
 
-        if num not in note_numbers:
+        if num not in num_as_chars:
             num = num - 1
             prepend = '^'
+        else:
+            prepend = '='
 
-        char = note_numbers[num]
+        char = num_as_chars[num]
 
         if len(x) != 1: hold = str(len(x))
         out += prepend + char + append + hold
@@ -326,6 +327,7 @@ if __name__ == '__main__':
     # decode.play()
 
     decode = Decoder.from_single_vector('generated_notes_July30_V3.npy', time='1/48')
-    #decode.play_all()
+    decode.play(0)
+    # decode.play_all()
     # decode.test_play_all()
-    decode.save_tune(1, out='mid')
+    # decode.save_tune(1, out='mid')
