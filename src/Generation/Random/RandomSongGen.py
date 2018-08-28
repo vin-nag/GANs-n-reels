@@ -3,11 +3,18 @@
 # A random ABC generator
 
 import random
+from music21 import *
+#import mingus.core.notes as notes
+#import mingus.core.diatonic as diatonic
+#import mingus.core.scales as scales
 
 class RandomGenerator:
     
-    # Pass in option when initalizing the class. 0 = random, 1 = statistics, 2 = type/time restriction
-    # Potential fourth option to limit note choices from keys
+    # Pass in option when initalizing the class. 
+    # 0 = random, 
+    # 1 = statistics, 
+    # 2 = type/time restriction using statistics
+    # 3 = type/time AND note/key retriction using statistics
     def __init__(self, option):
         self.songs = {}
         self.option = option
@@ -18,12 +25,13 @@ class RandomGenerator:
         self.accidentalsBefore = ['^' , '=' , '_']
         # Accidentals that come after the note and have no effect on timing of notes
         # For 11k songs: ' = 3700  , = 20k
+        # Accidentals after the note are , and '
         self.accidentalsAfter = [',' , '\'']
         # Accidentals that effect a notes length
         self.accidentalsTime = [['<'] + ['>']]
 
     # Randomly genereate ABC notation
-    def generateABC(self, timeSignature):
+    def generateABC(self, timeSignature, key = None):
         abc = ['|','|']
         abcOut = []
         measures = 16
@@ -31,6 +39,7 @@ class RandomGenerator:
         beatPerMeasure = 4
         notesMes = 8
         choice = random.randint(1,2)
+        # Option 0 = completly random
         if self.option == 0:
             for x in range(2):
                 for y in range(notesMes):
@@ -38,6 +47,7 @@ class RandomGenerator:
                     accBf = random.choice(self.accidentalsBefore)
                     accAf = random.choice(self.accidentalsAfter)
                     abc[x] += (accBf + note + accAf)
+        # Option 1 = uses statistics
         elif self.option == 1:
             for x in range(2):
                 for y in range(notesMes):
@@ -53,6 +63,7 @@ class RandomGenerator:
                     else:
                         accAf = ''
                     abc[x] += (accBf + note + accAf)
+        # Option 2 = type/time restriction using statistics
         elif self.option == 2:
             time = timeSignature.split('/')
             # Note value for one beat (Time signature 'denominator')
@@ -73,7 +84,26 @@ class RandomGenerator:
                         accAf = random.choice(self.accidentalsAfter)
                     else:
                         accAf = ''
-                    abc[x] += (accBf + note + accAf)                                           
+                    abc[x] += (accBf + note + accAf)
+        # Option 3 = type/time AND note/key restriction using statistics
+        elif self.option == 3 and key != None:
+            time = timeSignature.split('/')
+            # Note value for one beat (Time signature 'denominator')
+            beat = int(time[1])
+            # noteMult give factor to multiply time sig 'numerator' by to get how many 1/8th notes per measure
+            noteMult = 8 // beat
+            notesMes = int(time[0]) * noteMult
+            notesKey = self.getNotesKey(key)
+            for x in range(2):
+                for y in range(notesMes):
+                    note = random.choice(notesKey)
+                    # Only possibly make accidentals after. Accidentals before are already determined by notes in the key
+                    randIntAf = random.randint(0,100)
+                    if randIntAf <= 2:
+                        accAf = random.choice(self.accidentalsAfter)
+                    else:
+                        accAf = ''
+                    abc[x] += (note + accAf)                                            
         #Randomly choose either AABB or ABAB
         if choice == 1:
             abcOut = abc[0]+abc[0]+abc[1]+abc[1]
@@ -221,21 +251,57 @@ class RandomGenerator:
             )
         return mode
 
+    # Get a list of notes found in a key
+    def getNotesKey(self, key):
+        # Pitch of the key (i.e. 'C')
+        pitchStr = key[0]
+        # Scale of the key (i.e. 'major')
+        scaleStr = key[1:]
+        if scaleStr == 'major':
+            sc = scale.MajorScale(pitch.Pitch(pitchStr))
+        elif scaleStr == 'minor':
+            sc = scale.MinorScale(pitch.Pitch(pitchStr))
+        elif scaleStr == 'mixolydian':
+            sc = scale.MixolydianScale(pitch.Pitch(pitchStr))
+        elif scaleStr == 'dorian':
+            sc = scale.DorianScale(pitch.Pitch(pitchStr))
+        # Get the notes in the scale
+        notes = [str(p) for p in sc.pitches]
+        notesUpper = []
+        notesLower = []
+        for n in notes:
+            accidental = n[1]
+            # Check for accidental. If accidental = an in, there is no sharp(#) or flat(-)
+            if accidental in ('0','1','2','3','4','5','6','7','8','9'):
+                notesUpper.append(n[0])
+                notesLower.append(n[0].lower())
+            elif accidental == '#':
+                notesUpper.append('^' + n[0])
+                notesLower.append('^' + n[0].lower())
+            elif accidental == '-':
+                notesUpper.append('_' + n[0])
+                notesLower.append('_' + n[0].lower())
+        notesAll = notesUpper[0:7] + notesLower[0:7]
+        return notesAll
+
     # Generate the random songs. num must be provided manually when invoking the function
     def generateSongs(self, num):
         for x in range(0,num):
             title = 'Random Song #'+str(x)
+            key = self.randMode()
             style = self.randStyle()
-            if self.option == 2:
+            if self.option == 3:
+                timeSig = self.styleTime(style)
+                abc = self.generateABC(timeSig, key)
+            elif self.option == 2:
                 timeSig = self.styleTime(style)
                 abc = self.generateABC(timeSig)
             else:
                 timeSig = self.randTime()
                 abc = self.generateABC(timeSig)
             noteLen = '1/8'
-            key = self.randMode()
             
-            self.songs[x] = {'tune':x, 'setting':x, 'name':title, 'type':style, 'meter':timeSig, 'L':noteLen, 'mode':key, 'abc':abc}
+            self.songs[x] = {'X':x, 'T':title, 'R':style, 'M':timeSig, 'L':noteLen, 'K':key, 'abc':abc}
         return self.songs
 
 
@@ -244,7 +310,7 @@ if __name__ == '__main__':
 
     player = Decoder()
 
-    gen = RandomGenerator(2)
+    gen = RandomGenerator(3)
     song = gen.generateSongs(2)
     print(song)
     player.play(song[0]['abc'])
