@@ -45,6 +45,15 @@ class StatsHandler:
     def save_stats_to_file(self):
         self.stats.save_stats(self.filename)
 
+    def get_styles(self):
+        return self.stats.tune_styles
+
+    def get_meters(self):
+        return self.stats.tune_meters
+
+    def get_modes(self):
+        return self.stats.tune_modes
+
 
 class StatsObject:
     def __init__(self, abc_tunes, vec_tunes):
@@ -83,14 +92,14 @@ class StatsObject:
                 self.mode_types_coarse[s] = self.tune_modes[x]
 
     def save_stats(self, outfile):
-        def print_continous_data(d, s=None):
+        def print_numerical_data(d, s=None):
             out = ""
             if s: out += "{} different types of {} were found.\n".format(len(d), s)
             lines = ["{: <14} - {: <5} / {: <5} --> {:8.2f}%".format(x, d[x], self.total_tunes, (100 * d[x] / self.total_tunes)) for x in d]
             out += '\n'.join(sorted(lines)) + "\n\n"
             return out
 
-        def print_discrete_data(d, s=None):
+        def print_categorical_data(d, s=None):
             out = ""
             if s: out += "{} different types of {} were found.\n".format(len(d), s)
             lines = ["{: <14} - {}".format(x, d[x]) for x in d]
@@ -99,11 +108,11 @@ class StatsObject:
 
         out = "\n" + str(datetime.now()) + "\n\n"
         out += 'A total of {} tunes were scanned.\n'.format(self.total_tunes)
-        out += print_continous_data(self.tune_styles, "SONG STYLES")
-        out += print_continous_data(self.tune_meters, "TIME SIGNATURES")
-        out += print_continous_data(self.tune_modes, "KEY SIGNATURES")
-        out += print_discrete_data(self.mode_types_fine, "MODE TYPES")
-        out += print_continous_data(self.mode_types_coarse)
+        out += print_numerical_data(self.tune_styles, "SONG STYLES")
+        out += print_numerical_data(self.tune_meters, "TIME SIGNATURES")
+        out += print_numerical_data(self.tune_modes, "KEY SIGNATURES")
+        out += print_categorical_data(self.mode_types_fine, "MODE TYPES")
+        out += print_numerical_data(self.mode_types_coarse)
 
         with open(FOLDER_NAME + STATS_DIR + outfile + '.txt', 'w') as f: f.write(out)
 
