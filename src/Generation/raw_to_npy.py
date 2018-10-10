@@ -16,12 +16,12 @@ FOLDER_NAME = '../../Data'
 ABC_OUT = '/Clean/'
 STATS_OUT = '/Statistics/'
 NPY_OUT = '/Vectors/'
-FILE_NAME = 'Common_Time'
+FILE_NAME = 'Major_Tunes'
 
-#
+
 TYPES = []
 METER = ['4/4']
-MODES = []
+MODES = ['Amajor', 'Cmajor', 'Dmajor', 'Emajor', 'Fmajor', 'Gmajor']
 
 BAR_SUBDIVISION = 48
 
@@ -69,7 +69,7 @@ def raw_abc_to_npy_file(update=False):
 
     print('Starting abc cleaning...')
     # TODO - Using the dictionary provided by the raw_to_dict function causes the numpy array to throw an error.
-    tunes = raw_to_dict(update=update, types=[], meters=['4/4'], modes=[])
+    tunes = raw_to_dict(update=update, types=TYPES, meters=METER, modes=MODES)
 
     print('Finished abc cleaning.')
     print('Starting vectorization process.')
