@@ -21,7 +21,7 @@ FILE_NAME = 'Major_Tunes'
 
 TYPES = []
 METER = ['4/4']
-MODES = ['Amajor', 'Cmajor', 'Dmajor', 'Emajor', 'Fmajor', 'Gmajor']
+MODES = ['Dmajor', 'Gmajor', 'Amajor', 'Cmajor', 'Emajor', 'Fmajor']
 
 BAR_SUBDIVISION = 48
 

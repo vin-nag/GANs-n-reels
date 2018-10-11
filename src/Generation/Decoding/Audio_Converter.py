@@ -34,7 +34,7 @@ class Converter:
         if type(tune) == str:
             parts = tune.split('.')
             if len(parts) != 2:
-                print("File name is likely not valid as splitting on '.' yielded {} parts instead of 2".format(len(parts)))
+                print("Splitting on '.' yielded {} parts instead of 2".format(len(parts)))
                 raise IndexError
             else:
                 self.is_stream = False

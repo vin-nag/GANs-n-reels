@@ -326,7 +326,7 @@ if __name__ == '__main__':
     # decode = Decoder.from_raw_abc(parse_raw_abc(rand_tune), override=True, time='1/4')
     # decode.play()
 
-    decode = Decoder.from_single_vector('generated_notes_July30_V3.npy', time='1/48')
+    decode = Decoder.from_single_vector('Major_Tunes_Generated_Oct11.npy', time='1/48')
     decode.play(0)
     # decode.play_all()
     # decode.test_play_all()
