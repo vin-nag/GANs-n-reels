@@ -1,0 +1,26 @@
+
+2018-10-17 01:29:07.095444
+
+A total of 6264 tunes were scanned.
+4 different types of SONG STYLES were found.
+barndance      - 671   / 6264  -->    10.71%
+hornpipe       - 1076  / 6264  -->    17.18%
+reel           - 4249  / 6264  -->    67.83%
+strathspey     - 268   / 6264  -->     4.28%
+
+1 different types of TIME SIGNATURES were found.
+4/4            - 6264  / 6264  -->   100.00%
+
+6 different types of KEY SIGNATURES were found.
+Amajor         - 656   / 6264  -->    10.47%
+Cmajor         - 206   / 6264  -->     3.29%
+Dmajor         - 2626  / 6264  -->    41.92%
+Emajor         - 65    / 6264  -->     1.04%
+Fmajor         - 170   / 6264  -->     2.71%
+Gmajor         - 2541  / 6264  -->    40.57%
+
+1 different types of MODE TYPES were found.
+major          - ['A', 'E', 'C', 'F', 'D', 'G']
+
+major          - 6264  / 6264  -->   100.00%
+

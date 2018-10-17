@@ -583,6 +583,10 @@ def clean(abc, tune_id='Test'):
     cleaned = parse_accidentals(cleaned)
     if '-' in cleaned: cleaned = remove_ties(cleaned)
 
+    #TODO - Added for testing
+    if 'z' in cleaned:
+        return '!!BAD ABC!!'
+
     if '!!BAD ABC' in cleaned:
         # print_bad_abc(abc, tune_id)
         return '!!BAD ABC!!'
