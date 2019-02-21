@@ -23,7 +23,7 @@ TYPES = []
 METER = ['4/4']
 MODES = ['Dmajor', 'Gmajor', 'Amajor', 'Cmajor', 'Emajor', 'Fmajor']
 
-BAR_SUBDIVISION = 48
+BAR_SUBDIVISION = 16
 
 
 def make_folder(f_name):
@@ -77,7 +77,7 @@ def raw_abc_to_npy_file(update=False):
     print('Creating dataframe...')
     tunes = pd.DataFrame.from_dict(tunes_raw, orient='index')
     tunes['abc_raw'] = tunes.abc # preserve the original abc strings
-    tunes = Vectorizer.vectorize_frame(tunes, pad_bars=True, bar_subdivision=16)
+    tunes = Vectorizer.vectorize_frame(tunes, pad_bars=True, bar_subdivision=BAR_SUBDIVISION)
 
     print("Size of Initial Frame: {}".format(len(tunes.index)))
     tunes_shaped = tunes[[len(tune.shape)==2 for tune in tunes.notes]].copy()

@@ -1,5 +1,5 @@
 
-2018-10-17 01:17:31.463532
+2019-02-20 20:25:32.379064
 
 A total of 6264 tunes were scanned.
 4 different types of SONG STYLES were found.
@@ -20,7 +20,7 @@ Fmajor         - 170   / 6264  -->     2.71%
 Gmajor         - 2541  / 6264  -->    40.57%
 
 1 different types of MODE TYPES were found.
-major          - ['F', 'C', 'G', 'E', 'D', 'A']
+major          - ['D', 'G', 'A', 'F', 'C', 'E']
 
 major          - 6264  / 6264  -->   100.00%
 

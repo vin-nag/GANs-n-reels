@@ -64,7 +64,7 @@ flat_order = 'BEADGCF'
 
 def vectorize_frame(df, bar_subdivision=48, reindex=True, pad_bars=True):
     """
-    Takes a pandas dataframe and returns it with 2 new frames appended for notes and timing
+    Takes a pandas dataframe and returns it with 2 new columns appended for notes and timing
     bar_subdivision controls how many 'ticks' a bar is split into
     :param df: pandas dataframe with an 'abc' column
     """
