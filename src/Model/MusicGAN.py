@@ -3,9 +3,8 @@ from keras import optimizers
 from keras import models
 from keras.layers.advanced_activations import LeakyReLU
 import numpy as np
-import matplotlib as plt
-import tensorflow
-import pandas as pd
+import matplotlib.pyplot as plt
+
 
 class GAN():
     def __init__(self, paddedData, data, presentation=False):
@@ -41,6 +40,19 @@ class GAN():
         self.combined = models.Model(inputs=noise, outputs=valid)
         self.combined.compile(loss='binary_crossentropy', optimizer=optimizer)
 
+        self.normalizedData = self.normalizeData(self.paddedData)
+
+    def normalizeData(self, data):
+        def normalize(arr, minVal, maxVal):
+            return -1 + 2 * (arr - minVal) / (maxVal - minVal)  # Mapped to [-1,1]
+
+        maxNote = np.percentile(data[:, :, :, 0], 95)
+        minNote = np.percentile(data[:, :, :, 0], 5)
+
+        normalizedData = np.array(data)
+        normalizedData[:,:,:,0] = normalize(normalizedData[:,:,:,0], minNote, maxNote)
+        return normalizedData
+
     def build_generator(self, momentum=0.8, alpha_leak=0.2):
         if(self.presentation):
             print("Building Generator...")
@@ -52,20 +64,21 @@ class GAN():
         model.add(LeakyReLU(alpha=alpha_leak))
         model.add(layers.BatchNormalization(momentum=momentum))
 
-        model.add(layers.Dense(64 * (1 + self.img_dim[0] // 2) * (
+        model.add(layers.Dense(64 * self.channels * (1 + self.img_dim[0] // 2) * (
                     self.img_dim[1] // 2)))  # 64 filters, each of half the size of the input image
         model.add(LeakyReLU(alpha=alpha_leak))
         model.add(layers.BatchNormalization(momentum=momentum))
-        model.add(layers.Reshape([(1 + self.img_dim[0] // 2), (self.img_dim[1] // 2), 64]))
+        model.add(layers.Reshape([(1 + self.img_dim[0] // 2), (self.img_dim[1] // 2), 64 * self.channels]))
 
-        model.add(layers.Conv2DTranspose(32, [2, 5], padding="same"))  # 32 filters, each of the size of the input image
+        model.add(layers.Conv2DTranspose(32 * self.channels, [2, 5],
+                                         padding="same"))  # 32 filters, each of the size of the input image
         model.add(LeakyReLU(alpha=alpha_leak))
         model.add(layers.BatchNormalization(momentum=momentum))
         model.add(layers.UpSampling2D(
             size=[2, 2]))  # now the filters are of the full size of the image, with 1 additional row at the top
         model.add(layers.Cropping2D(cropping=[[1, 0], [0, 0]]))  # remove extra padding at the top
 
-        model.add(layers.Conv2DTranspose(1, [2, 5], padding="same", activation="tanh"))  # image
+        model.add(layers.Conv2DTranspose(self.channels, [2, 5], padding="same", activation="tanh"))  # image
 
         model.summary()
 
@@ -76,16 +89,16 @@ class GAN():
 
     def build_discriminator(self, alpha_leak=0.2):
         if (self.presentation):
-            print("Building Generator...")
+            print("Building Discriminator...")
 
         img_shape = self.img_shape
 
         model = models.Sequential()
 
-        model.add(layers.Conv2D(32, [2, 9], strides=[1, 1], padding="valid", input_shape=img_shape))
+        model.add(layers.Conv2D(32 * self.channels, [2, 9], strides=[1, 1], padding="valid", input_shape=img_shape))
         model.add(layers.Cropping2D(cropping=[[0, 1], [4, 4]]))
         model.add(LeakyReLU(alpha=alpha_leak))
-        model.add(layers.Conv2D(64, [2, 9], strides=[2, 2], padding="same"))
+        model.add(layers.Conv2D(64 * self.channels, [2, 9], strides=[2, 2], padding="same"))
         model.add(LeakyReLU(alpha=alpha_leak))
         model.add(layers.Flatten())
         model.add(layers.Dense(1024))
@@ -103,11 +116,7 @@ class GAN():
         if (self.presentation):
             print("Starting GAN Training ...")
 
-        X_train = self.paddedData
-        halfMaxPitch = (80 + 53) // 2
-        pitchRange = 80 - halfMaxPitch
-        X_train = (X_train.astype(np.float32) - halfMaxPitch) / pitchRange
-        X_train = np.expand_dims(X_train, axis=3)
+        X_train = self.normalizedData
 
         for iteration in range(iterations + 1):
             for _ in range(1):  # train discriminator more times
@@ -126,14 +135,9 @@ class GAN():
                     discriminator_loss[0],
                     100 * discriminator_loss[1],
                     generator_loss))
+                self.sample_images()
 
-
-                if (self.presentation):
-                    print("Sample Images")
-                    self.sample_images()
-
-        if self.presentation:
-            self.plotLossHistory()
+        # self.plotLossHistory()
 
     def train_discriminator(self, X_real, batch_size):
         half_batch = batch_size // 2
@@ -171,30 +175,42 @@ class GAN():
         rows, columns = 4, 4
         noise = np.random.normal(0, 1, [rows * columns, 100])
 
-        generated_imgs = self.generator.predict(noise)[:, :-1, 4:-4]
+        generated_imgs = self.generator.predict(noise)  # [:, :-1, horizontalPad:-horizontalPad,:]
         generated_imgs = 0.5 * generated_imgs + 0.5
 
         random_real_indices = np.random.randint(0, self.data.shape[0], rows * columns)
-        real_imgs = self.data[random_real_indices]
+        real_imgs = self.normalizedData[random_real_indices]  # [random_real_indices,:-1, horizontalPad:-horizontalPad, :]
+        real_imgs = 0.5 * real_imgs + 0.5
 
-        print("Real")
-        fig, axs = plt.subplots(rows, columns)
-        for row in range(rows):
-            for column in range(columns):
-                count = row * columns + column
-                axs[row, column].imshow(real_imgs[count, :, :], cmap='gray', aspect='auto')
-                axs[row, column].axis('off')
+        def prepare_images(images):
+            third_channels = np.zeros([images.shape[0], images.shape[1], images.shape[2], 1])
+            third_channels[:, :, :, 0] = 0
+            prepared = np.append(images, third_channels, axis=-1)
+            return prepared
 
-        plt.show()
+        def plotImageGroup(images):
+            fig, axs = plt.subplots(rows, columns)
+            for row in range(rows):
+                for column in range(columns):
+                    count = row * columns + column
+                    axs[row, column].imshow(images[count], cmap="gray", aspect='auto')
+                    axs[row, column].axis('off')
 
-        print("Generated")
-        fig, axs = plt.subplots(rows, columns)
-        for row in range(rows):
-            for column in range(columns):
-                count = row * columns + column
-                axs[row, column].imshow(generated_imgs[count, :, :, 0], cmap='gray', aspect='auto')
-                axs[row, column].axis('off')
+            plt.show()
 
-        plt.show()
+        # real_imgs, generated_imgs = prepare_images(real_imgs), prepare_images(generated_imgs)
+
+        print("Real: Notes")
+        plotImageGroup(real_imgs[:, :, :, 0])
+
+        print("Generated: Notes")
+        plotImageGroup(generated_imgs[:, :, :, 0])
+
+        #           print("Real: Timing")
+        #           plotImageGroup(real_imgs[:,:,:,1])
+
+        #           print("Generated: Timing")
+        #           plotImageGroup(generated_imgs[:,:,:,1])
+
         self.plotLossHistory()
 
