@@ -1,12 +1,13 @@
-from src.Generation.Decoding import Decoding
+from src.Generation.Decoding.Decoding import Decoder
+import numpy as np
 
 
-def demo_helper(vec):
-    decoder = Decoding.Decoder()
-    Decoding.pitches_to_img(vec, out='Display.png')
-    abc_dic = Decoding.decode_single_vector(vec)
+def demo_helper():
+    # decoder = Decoder.from_h5()
+    decoder = Decoder.from_single_vector(np.load("generated_notes.npy"), time="1/16")
     decoder.set_time('1/16')
-    decoder.play_from_dict(abc_dic[0])
+    #decoder.play(0)
+    decoder.save_tune(0)
 
 if __name__ == '__main__':
-    pass
+    demo_helper()

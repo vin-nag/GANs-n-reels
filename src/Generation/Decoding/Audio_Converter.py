@@ -4,7 +4,7 @@ import tempfile
 
 # TODO - Determine why MIDI saves correctly, but WAVa nd MP3 do not.
 
-default = '../../../Data/Audio/'
+default = '../../Data/Audio/'
 
 
 class Converter:

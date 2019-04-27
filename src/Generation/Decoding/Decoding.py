@@ -13,7 +13,7 @@ import keras
 VECTOR_DIR = '../../../Data/Vectors/'
 
 MAX_PITCH = 80
-MIN_PITCH = 53
+MIN_PITCH = 57
 MID_PITCH = (MAX_PITCH + MIN_PITCH) / 2
 RANGE = MAX_PITCH - MIN_PITCH
 
@@ -36,14 +36,14 @@ num_as_chars = inv_map = {v: k for k, v in Vec.chars_as_num.items()}
 def convert_note_list(lst):
     """
     Converts a vectorized tune to ABC
-    :param lst: The list of bars in the tune
+    :param lst: The list of repeat groups in the tune, for example [[10, 10, 10], [11,11], [10,10]]
     :return: The ABC string
     """
     out = ''
-    for x in lst:
+    for group in lst:
         append = ''
         hold = ''
-        num = x[0]
+        num = group[0]
         if not (num == 0 or (60 <= num <= 83)):
             if num > 83:
                 mult = (num - 72) // 12
@@ -62,7 +62,7 @@ def convert_note_list(lst):
 
         char = num_as_chars[num]
 
-        if len(x) != 1: hold = str(len(x))
+        if len(group) != 1: hold = str(len(group))
         out += prepend + char + append + hold
     return out
 
@@ -74,16 +74,21 @@ def decode_single_vector(array, presentation):
     :return: A dictionary of abc strings.
     """
 
-    def decode_song(vec):
-        dur = [vec[0][0]]
+    def group_repeats(tune):
+        """
+        Turns [10, 10, 10, 11, 11] into [[10, 10, 10], [11, 11]]
+
+        :param tune: A 2D vector representing the tune
+        """
+        first_note = tune[0,0]
+        repeat_group = [first_note]
         master = []
-        for x in vec:
-            for y in x:
-                if y == dur[0]:
-                    dur.append(y)
+        for note in tune.flatten():
+                if note == repeat_group[0]:
+                    repeat_group.append(note)
                 else:
-                    master.append(dur)
-                    dur = [y]
+                    master.append(repeat_group)
+                    repeat_group = [note]
         return master
 
     if presentation:
@@ -95,11 +100,11 @@ def decode_single_vector(array, presentation):
         plt.show()
 
     tunes = dict()
-    c = 0
-    for x in array:
-        tune = decode_song(x)
-        tunes[c] = convert_note_list(tune)
-        c += 1
+
+    for i in range(array.shape[0]):
+        tune = array[i]
+        tune = group_repeats(tune)
+        tunes[i] = convert_note_list(tune)
 
     if presentation:
         print("Decoding Vectors to ABC format...")
@@ -142,7 +147,7 @@ class Decoder:
         self.timing = timing
         self.tunes = tunes
         self.gan = gan
-        self.header = '''X: 1\nT: AI Music\nR: reel\nM: 4/4\nL: {}\nK: {}\n'''.format(self.time, self.key)
+        self.header = '''X: 1\nT: AI Music\nR: reel\nM: 4/4\nL: {}\nK: {}\nQ: 120\n'''.format(self.time, self.key)
 
     def set_key(self, key):
         self.key = key
@@ -232,7 +237,7 @@ class Decoder:
             plt.axis('off')
             plt.title("4 bars per line", fontsize=10)
             plt.matshow(img.reshape(4, width * 4), cmap='gray', interpolation='nearest', fignum=0, aspect="auto")
-        plt.savefig('../../../Data/Images/' + out)
+        plt.savefig('../../Data/Images/' + out)
 
     def refresh_tunes(self, presentation=False):
         if self.gan:
@@ -247,8 +252,8 @@ class Decoder:
 
             # Make values discrete
             generated_samples = generated_samples.astype(np.int32)
-            self.pitches = decode_single_vector(generated_samples, False)
-            self.tunes = decode_single_vector(self.pitches, presentation)
+            self.pitches = generated_samples
+            self.tunes = decode_single_vector(generated_samples, False)
         else:
             print("Failed to update songs.")
 
@@ -276,7 +281,7 @@ class Decoder:
         return cls([], [], tunes, time, key)
 
     @classmethod
-    def from_h5(cls, generator="../src/Model/Trained/generator.h5", time='1/48', key='Cmaj', presentation=False):
+    def from_h5(cls, generator="../../src/Model/Trained/generator.h5", time='1/16', key='Cmaj', presentation=False):
         gan = keras.models.load_model(generator)
         obj = cls([], [], [], time, key, gan=gan)
         obj.refresh_tunes(presentation)
