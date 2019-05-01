@@ -2,7 +2,7 @@
 
 *Creating Music Using a Generative Adversarial Network*
 
-By Billard, Mitchell; Bishop, Robert; Elsisy, Moustafa; Graves, Caleb; Dr. Kolokolova, Antonina; Nagisetty, Vineel; and Northcott, Zachary: all affiliated with Memorial University of Newfoundland
+By Billard, Mitchell; Bishop, Robert; Elsisy, Moustafa; Graves, Laura; Dr. Kolokolova, Antonina; Nagisetty, Vineel; and Northcott, Zachary: all affiliated with Memorial University of Newfoundland
 
 ## Table of Contents
 * Introduction
