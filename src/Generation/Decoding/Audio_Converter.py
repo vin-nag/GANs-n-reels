@@ -4,7 +4,7 @@ import tempfile
 
 # TODO - Determine why MIDI saves correctly, but WAVa nd MP3 do not.
 
-default = '../../Data/Audio/'
+default = '/Users/calebg/Documents/School/Code Repository/GANs-n-reels/src/L/Songs/Redo/'
 
 
 class Converter:
@@ -77,6 +77,10 @@ class Converter:
     def save_song_from_stream(self):
         file_out = default + 'song_{}.{}'.format(self.num, self.out_type)
 
+        # print("file_out: {}".format(file_out))
+
+        # print(self.out_type)
+
         if self.out_type == 'mid':
             # Save directly to disk. Music21 automatically handles this
             self.tune.write('midi', fp=file_out)
@@ -109,6 +113,8 @@ class Converter:
     def save_song_from_file(self):
         file_in = default+self.tune
         file_out = default + '{}.{}'.format(self.file_name, self.out_type)
+
+        print("file_in: {}".format(file_in))
 
         # If the input is MIDI, we need to use a temporary file to convert to WAV.
         if self.tune[-3:] == 'mid':

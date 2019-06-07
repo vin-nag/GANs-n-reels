@@ -1,4 +1,4 @@
-# Author: Caleb Graves
+# Author: Laura Graves
 from music21.pitch import AccidentalException
 from music21 import converter
 from music21 import instrument
@@ -8,7 +8,7 @@ from src.Generation.Vectorizing import Vectorizer as Vec
 import matplotlib.pyplot as plt
 import numpy as np
 import random
-import keras
+# import keras
 
 VECTOR_DIR = '../../../Data/Vectors/'
 
@@ -140,7 +140,7 @@ class Decoder:
     """
     A class which helps control the variables for playing the music.
     """
-    def __init__(self, pitches, timing, tunes, time='1/48', key='Cmaj', gan=None):
+    def __init__(self, pitches, timing, tunes, time='1/16', key='Dmaj', gan=None):
         self.time = time
         self.key = key
         self.pitches = pitches
@@ -156,7 +156,7 @@ class Decoder:
         self.time = time
 
     def save_tune(self, num, out='mid'):
-        abc = self.header + self.tunes[num]
+        abc = self.header + self.tunes[0]
         tune = converter.parse(abc, format='abc')
         for p in tune.parts: p.insert(0, instrument.Flute())
         switch = Audio_Converter.Converter(tune, out_type=out, num=num)
@@ -258,7 +258,7 @@ class Decoder:
             print("Failed to update songs.")
 
     @classmethod
-    def from_raw_abc(cls, abc, time='1/8', key='Cmaj', presentation=False, override=False):
+    def from_raw_abc(cls, abc, time='1/8', key='Dmaj', presentation=False, override=False):
         import src.Generation.Cleaning.Cleaner as clean
         abc = clean.clean(abc, 0)
         if override:
@@ -272,7 +272,7 @@ class Decoder:
         return cls([], [], tunes, time, key)
 
     @classmethod
-    def from_dict(cls, tunes, time='1/8', key='Cmaj', presentation=False):
+    def from_dict(cls, tunes, time='1/8', key='Dmaj', presentation=False):
         try:
             tunes = {x: tunes[x]['abc'] for x in tunes}
         except IndexError:
@@ -280,15 +280,15 @@ class Decoder:
 
         return cls([], [], tunes, time, key)
 
-    @classmethod
-    def from_h5(cls, generator="../../src/Model/Trained/generator.h5", time='1/16', key='Cmaj', presentation=False):
-        gan = keras.models.load_model(generator)
-        obj = cls([], [], [], time, key, gan=gan)
-        obj.refresh_tunes(presentation)
-        return obj
+    # @classmethod
+    # def from_h5(cls, generator="../../src/Model/Trained/generator.h5", time='1/16', key='Dmaj', presentation=False):
+    #     gan = keras.models.load_model(generator)
+    #     obj = cls([], [], [], time, key, gan=gan)
+    #     obj.refresh_tunes(presentation)
+    #     return obj
 
     @classmethod
-    def from_single_vector(cls, pitches, time='1/48', key='Cmaj', presentation=False):
+    def from_single_vector(cls, pitches, time='1/48', key='Dmaj', presentation=False):
         if type(pitches) == str: pitches = load_vector(pitches)
         tunes = decode_single_vector(pitches, presentation)
 
@@ -303,14 +303,46 @@ class Decoder:
 
 
 if __name__ == '__main__':
-    drowsy_maggie = '''|:E2BE dEBE|E2BE AFDF|E2BE dEBE|1 BABc dAFD:|2 BABc dAFA||
-                    |:d2fd cdec|defg afge|1 d2fd c2ec|BABc dAFA:|2 afge fdec|BABc dAFA||
-                    |:dBfB dBfB|cAeA cAeA|1 dBfB dBfB|defg aece:|2 defg aecA|BABc dAFA||
-                    |:dffe dfBf|ceed ceAe|1 dffe defg|a2ag aece:|2 af=ge fdec|BABc dAFD||'''
 
-    rand_tune = """A,A,B,A,A,A,G,G,G,A,B,B,CB,EE|EEAAffeeddBBGGFF|EEFFEEBAGGAAGGGG|ccccdeeeddBBGGAA|ggeeccfeAABBBBFF|ccAAddddddccGGFF|DDEECB,B,B,D,E,B,B,CCCC|B,B,CB,A,A,FFDDDDEEGG|ddcccBGFGGBBFFcd|ddccefggccAGB,CBB|AAAAddfeffBBffAG|AABBBBFFCCB,B,CCCB,|A,A,B,B,B,CEEGGDCFFAA|DDFFDDcBAAGFB,B,cc|cBccaaabfgfgBcee|AAGGEECB,B,B,B,A,CCA,G,"""
+    # drowsy_maggie = '''|:E2BE dEBE|E2BE AFDF|E2BE dEBE|1 BABc dAFD:|2 BABc dAFA||
+    #                 |:d2fd cdec|defg afge|1 d2fd c2ec|BABc dAFA:|2 afge fdec|BABc dAFA||
+    #                 |:dBfB dBfB|cAeA cAeA|1 dBfB dBfB|defg aece:|2 defg aecA|BABc dAFA||
+    #                 |:dffe dfBf|ceed ceAe|1 dffe defg|a2ag aece:|2 af=ge fdec|BABc dAFD||'''
+    #
+    # rand_tune = '''AAAAAABBAAAAAAdd|AAGGG^FAAGG^F^FEEDD|EEEE^F^FGG^F^FEEG^Fdd||
+    # |BBBBBdGGBBAAAAAA|AABBAGGGAAAAAAdd|AAGG^F^FAAGG^F^F^F^FEE|BBddddddBBBB^FGAA||
+    # |ABBBGGGG^F^F^F^FEE^F^F|GABBGGAAAAAAAAdd|AAGGGGAAGG^F^FEEDD|EEEE^F^F^F^F^F^FEEG^FBB||
+    # |ddddBBAGBBAAAGAA|AAEEGGAGAAAAAAdd|AAGGGGAAGG^F^F^F^FEE|BBBdddddAABBAAAA|AA^F^FGG^F^F^F^FEEGGAA'''
 
-    # decode = Decoder.from_raw_abc(drowsy_maggie, key='Dmaj')
+
+    songs = []
+
+    with open('/Users/calebg/Documents/School/Code Repository/GANs-n-reels/src/L/clean_generated_tunes.csv', 'r') as f:
+
+        f.readline()
+
+        for line in f:
+
+            index = 0
+            while True:
+                if line[index] == ',':
+                    break
+                else:
+                    index += 1
+
+            song = line[index+1:]
+            song = song.replace('"', "")
+            song = song.replace(",", "")
+            # print(song)
+            songs.append(song)
+
+    for i, song in enumerate(songs):
+        print("{}: {}".format(i, song))
+        decode = Decoder.from_raw_abc(song, key='Dmaj')
+        decode.save_tune(i, out='wav')
+
+    # decode = Decoder.from_raw_abc(rand_tune, key='Dmaj')
+    # decode.save_tune(0, out='wav')
     # decode.play()
 
     # decode = Decoder.from_dict({0: {'abc': drowsy_maggie}}, key='Dmaj')
@@ -324,5 +356,5 @@ if __name__ == '__main__':
     # decode.play_all()
     # decode.test_play_all()
     # decode.save_tune(1, out='mid')
-    decode = Decoder.from_h5()
-    decode.play_infinite()
+    # decode = Decoder.from_h5()
+    # decode.play_infinite()

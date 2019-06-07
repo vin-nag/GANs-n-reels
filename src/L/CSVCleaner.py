@@ -11,15 +11,17 @@ with open('generated_tunes.csv', 'r') as f:
 
 newsongs = []
 
-for song in songs:
+for num, song in enumerate(songs):
+
+    print("Song {}:".format(num))
 
     bars = song.split('|')
 
     newbars = []
 
-    for bar in bars:
+    for i, bar in enumerate(bars):
 
-        # print("Original: {}".format(bar))
+        print("Original bar {}: {}".format(i, bar))
 
         test = []
         i = 0
@@ -60,12 +62,13 @@ for song in songs:
         if count > 1:
             newbar += str(count)
 
-        # print("Updated: {}".format(newbar))
+        print("Updated: {}".format(newbar))
         newbars.append(newbar)
+        print(newbar)
 
     newsongs.append('|'.join(newbars).replace('"', ''))
 
-with open('cleaned_tunes.csv', 'w') as f:
-    f.write(',tunes\n')
-    for i, song in enumerate(newsongs):
-        f.write('{},{}'.format(i, song))
+# with open('cleaned_tunes.csv', 'w') as f:
+#     f.write(',tunes\n')
+#     for i, song in enumerate(newsongs):
+#         f.write('{},{}'.format(i, song))
