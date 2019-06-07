@@ -11,6 +11,7 @@ BAR_SUBDIVISION = 48
 NOTE_MULT = BAR_SUBDIVISION // 8  # value to multiply an 8th note by
 PAD_BARS = True
 PAD_METHOD = 1  # 1 is stretch
+TRANSPOSE_OFFSET = 2 #by default notes are transposed to C, this value will be added to transpose to other keys (ie 2 is D)
 
 # region MUSIC THEORY STRUCTS
 # Dicts for note conversion
@@ -74,7 +75,7 @@ def vectorize_frame(df, bar_subdivision=48, reindex=True, pad_bars=True):
     PAD_BARS = pad_bars
     df['notes'], df['timing'] = zip(*df.apply(vectorize_abc, axis=1))
     # TODO - Multiply the spots with 0's by 0, and everything else by 1
-    df['notes'] = (df['notes'] + df['mode'].map(transpose_tune))
+    df['notes'] = (df['notes'] - df['mode'].map(transpose_tune) + TRANSPOSE_OFFSET)
     if reindex: df.reset_index(drop=True, inplace=True)
     return df
 
