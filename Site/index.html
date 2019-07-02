@@ -440,19 +440,7 @@
 			<script src="assets/js/breakpoints.min.js"></script>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
-
-			<script>
-			async function generate() {
-				const noise = Array.from({length: 100}, () => Math.random() );
-				console.log(noise);
-
-			    //const model = await tf.loadLayersModel('https://github.com/vin-nag/GANs-n-reels/blob/origin/siteWithH5/src/Model/Trained/model.json');
-				//const model = await tf.loadLayersModel('assets/js/model.json');
-                const model = await tf.models.modelFromJSON('assets/js/model.json');
-				// randomly generated N = 40 length array 0 <= A[N] <= 39
-				document.getElementById("play").innerHTML = "Hello World";
-			}
-			</script>
+			<script src="assets/js/generator.js"></script>
 
 	
 </body></html>

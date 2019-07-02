@@ -1,6 +1,12 @@
-const model = tf.loadLayersModel('/home/vineel/PycharmProjects/GANs-n-reels/src/Model/Trained/model.json');
+async function generate() {
+    const model = await tf.loadLayersModel('assets/model.json');
+    const noise = Array.from({length: 100}, () => Math.random());
+    const prediction = model.predict(tf.tensor(noise, [1,100])).dataSync();
+    console.log(prediction);
+    document.getElementById("play").innerHTML = prediction[0];
+}
 
-// randomly generated N = 40 length array 0 <= A[N] <= 39
-const noise = Array.from({length: 100}, () => Math.random() );
+function decode(){};
 
-console.log(noise);
+function convertToABC(){};
+
