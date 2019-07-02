@@ -16,7 +16,7 @@ FOLDER_NAME = '../../Data'
 ABC_OUT = '/Clean/'
 STATS_OUT = '/Statistics/'
 NPY_OUT = '/Vectors/'
-FILE_NAME = 'Major_Tunes'
+FILE_NAME = 'June_Fixes'
 
 
 TYPES = []
@@ -73,7 +73,7 @@ def raw_abc_to_npy_file(update=False):
 
     print('Finished abc cleaning.')
     print('Starting vectorization process.')
-    from Data.Clean.Common_Time import tunes as tunes_raw
+    from Data.Clean.Major_Tunes import tunes as tunes_raw
     print('Creating dataframe...')
     tunes = pd.DataFrame.from_dict(tunes_raw, orient='index')
     tunes['abc_raw'] = tunes.abc # preserve the original abc strings
