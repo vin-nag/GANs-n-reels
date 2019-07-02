@@ -5,7 +5,7 @@
 		
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 		<link rel="stylesheet" href="assets/css/main.css">
-		<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.12.0"> </script>
+		<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"> </script>
 		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
 	</head>
 	<body class="">
@@ -442,11 +442,13 @@
 			<script src="assets/js/main.js"></script>
 
 			<script>
-			function generate() {
-				const model = tf.loadLayersModel('/home/vineel/PycharmProjects/GANs-n-reels/src/Model/Trained/model.json');
-				// randomly generated N = 40 length array 0 <= A[N] <= 39
+			async function generate() {
 				const noise = Array.from({length: 100}, () => Math.random() );
 				console.log(noise);
+
+			    //const model = tf.loadLayersModel('https://github.com/vin-nag/GANs-n-reels/blob/origin/siteWithH5/src/Model/Trained/model.json');
+				const model = await tf.loadLayersModel('file://src/Model/Trained/model');
+                // randomly generated N = 40 length array 0 <= A[N] <= 39
 				document.getElementById("play").innerHTML = "Hello World";
 			}
 			</script>
