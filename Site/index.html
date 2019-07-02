@@ -5,6 +5,7 @@
 		
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 		<link rel="stylesheet" href="assets/css/main.css">
+		<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.12.0"> </script>
 		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
 	</head>
 	<body class="">
@@ -22,6 +23,7 @@
 							<li><a href="#approach" class="scrolly">Approach</a></li>
 							<li><a href="#results" class="scrolly">Results</a></li>
 							<li><a href="#listen" class="scrolly">Listen</a></li>
+							<li><a href="#generate" class="scrolly">Generate</a></li>
 							<li><a href="#us" class="scrolly">Who We Are</a></li>
 						</ul>
 					</nav>
@@ -39,6 +41,7 @@
 							<ul class="actions">
 								<li><a href="#motivation" class="button scrolly">Learn more</a></li>
                                 <li><a href="#listen" class="button scrolly">Listen</a></li>
+								<li><a href="#generate" class="button scrolly">Generate</a></li>
 								<li><a href="https://github.com/vin-nag/GANs-n-reels" target="_blank" class="button">Code Repository</a></li>
 								<li><a href="#us" class="button scrolly">Who We Are</a></li>
 							</ul>
@@ -194,6 +197,7 @@
 
                             <ul class="actions">
                                 <li><a href="#listen" class="button scrolly">Listen</a></li>
+								<li><a href="#generate" class="button scrolly">Generate</a></li>
                             </ul>
                         </div>
                     </section>
@@ -309,6 +313,16 @@
 						</div>
 					</section>
 
+				<!-- Generate -->
+					<section id="generate" class="wrapper style3 fullscreen fade-up">
+						<div class="inner">
+							<h2>Generate</h2>
+							<p id="play"></p>
+
+							<button onclick="generate()">Generate Your Own</button>
+
+                        </div>
+                    </section>
 
 				<!-- Who We Are -->
 					<section id="us" class="wrapper style2 fullscreen fade-up spotlights">
@@ -413,7 +427,7 @@
 			<footer id="footer" class="wrapper style1-alt">
 				<div class="inner">
 					<ul class="menu">
-						<li>© GANs and Reels. All rights reserved.</li><li>Design: <a href="http://html5up.net/">Hyperspace from HTML5 UP</a></li>
+						<li>© GANs and Reels. All rights reserved.</li><li	>Design: <a href="http://html5up.net/">Hyperspace from HTML5 UP</a></li>
 					</ul>
 				</div>
 			</footer>
@@ -426,6 +440,16 @@
 			<script src="assets/js/breakpoints.min.js"></script>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
+
+			<script>
+			function generate() {
+				const model = tf.loadLayersModel('/home/vineel/PycharmProjects/GANs-n-reels/src/Model/Trained/model.json');
+				// randomly generated N = 40 length array 0 <= A[N] <= 39
+				const noise = Array.from({length: 100}, () => Math.random() );
+				console.log(noise);
+				document.getElementById("play").innerHTML = "Hello World";
+			}
+			</script>
 
 	
 </body></html>
