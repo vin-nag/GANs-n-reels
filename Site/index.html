@@ -5,9 +5,16 @@
 		
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 		<link rel="stylesheet" href="assets/css/main.css">
+		<link href="assets/css/abcjs-midi.css" media="all" rel="stylesheet" type="text/css" />
 		<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"> </script>
-		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
-	</head>
+        <noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+		<script src="assets/js/abcjs_midi_5.6.5-min.js" type="text/javascript"></script>
+		<style>
+			.abcjs-inline-midi {
+				max-width: 800px;
+			}
+		</style>
+		</head>
 	<body class="">
 
 		<!-- Sidebar -->
@@ -317,7 +324,9 @@
 					<section id="generate" class="wrapper style3 fullscreen fade-up">
 						<div class="inner">
 							<h2>Generate</h2>
-							<p id="play"></p>
+							<pre style="text-align: justify;" id="abcString"></pre>
+							<p id="notation"></p>
+							<p id="player"></p>
 
 							<button onclick="generate()">Generate Your Own</button>
 
@@ -441,6 +450,5 @@
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
 			<script src="assets/js/generator.js"></script>
-
 	
 </body></html>
