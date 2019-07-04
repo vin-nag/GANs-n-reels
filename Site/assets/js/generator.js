@@ -24,10 +24,20 @@ async function generate(){
     let myString = convertToABC(dMajorNotes);
 
     // render and play the song
-    document.getElementById("abcString").innerHTML = myString;
-    ABCJS.renderAbc('notation', myString);
-    ABCJS.renderMidi('player', myString);
-};
+    render(myString);
+}
+
+/**
+ * This function scales the note to the range seen in the sessions
+ * @param {string} string - the string representing the abc notation of the song
+ * @returns {none}
+ */
+function render(string){
+    document.getElementById("abcString").innerHTML = string;
+    ABCJS.renderAbc('notation', string);
+    ABCJS.renderMidi( "player", string, { program: 111, generateDownload: true, });
+
+}
 
 /**
  * This function scales the note to the range seen in the sessions
@@ -114,7 +124,7 @@ function convertToABC(song){
                 }
                 else {
                     if (occurences > 1){
-                        barString += temp + occurences + ' ' + eachBar[x];
+                        barString += temp + occurences + eachBar[x];
                     }
                     else {
                         barString += temp + ' ' + eachBar[x];
@@ -123,10 +133,10 @@ function convertToABC(song){
             }
             else if (temp !== eachBar[x]){
                 if (occurences > 1){
-                    barString += temp + occurences + ' ';
+                    barString += temp + occurences;
                 }
                 else {
-                    barString += temp + ' ';
+                    barString += temp;
                 }
                 temp = eachBar[x];
                 occurences = 1;
@@ -139,15 +149,15 @@ function convertToABC(song){
     }
 
     // add it to the abc string
-    var abcString = `T: GAN Generated Reel\n` +
-                `M: 4/4\n` +
-                `L: 1/16\n` +
-                `R: reel\n` +
-                `K: Dmaj\n` +
-                `|:${barArray[0]}|${barArray[1]}|${barArray[2]}|${barArray[3]}|\n` +
-                `${barArray[4]}|${barArray[5]}|${barArray[6]}|${barArray[7]}:|\n` +
-                `|:${barArray[8]}|${barArray[9]}|${barArray[10]}|${barArray[11]}|\n` +
-                `${barArray[12]}|${barArray[13]}|${barArray[14]}|${barArray[15]}:|`;
+    var abcString = `T: Insert Generated Name Here\n` +
+                    `C: GANs n Reels\n` +
+                    `M: 4/4\n` +
+                    `L: 1/16\n` +
+                    `K: Dmaj\n` +
+                    `|${barArray[0]}|${barArray[1]}|${barArray[2]}|${barArray[3]}|\n` +
+                    `${barArray[4]}|${barArray[5]}|${barArray[6]}|${barArray[7]}|\n` +
+                    `|${barArray[8]}|${barArray[9]}|${barArray[10]}|${barArray[11]}|\n` +
+                    `${barArray[12]}|${barArray[13]}|${barArray[14]}|${barArray[15]}|`;
 
     return abcString
 }
