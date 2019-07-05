@@ -23,6 +23,8 @@ async function generate(){
     // convert notes to abc string
     let myString = convertToABC(dMajorNotes);
 
+    //console.log(myString);
+
     // render and play the song
     render(myString);
 }
@@ -86,11 +88,11 @@ function convertNoteToABC(note){
             67: 'g',
             69: 'a',
             71: 'b',
-            73: 'c#',
-            74: 'd',
-            76: 'e',
-            78: 'f#',
-            79: 'g'
+            73: "c#'",
+            74: "d'",
+            76: "e'",
+            78: "f#'",
+            79: "g'"
         };
     return noteToABC[note];
 };
@@ -150,14 +152,14 @@ function convertToABC(song){
 
     // add it to the abc string
     var abcString = `T: Insert Generated Name Here\n` +
-                    `C: GANs n Reels\n` +
+                    `C: GAN Morrison\n` +
                     `M: 4/4\n` +
                     `L: 1/16\n` +
                     `K: Dmaj\n` +
-                    `|${barArray[0]}|${barArray[1]}|${barArray[2]}|${barArray[3]}|\n` +
-                    `${barArray[4]}|${barArray[5]}|${barArray[6]}|${barArray[7]}|\n` +
-                    `|${barArray[8]}|${barArray[9]}|${barArray[10]}|${barArray[11]}|\n` +
-                    `${barArray[12]}|${barArray[13]}|${barArray[14]}|${barArray[15]}|`;
+                    `|:${barArray[0]}|${barArray[1]}|${barArray[2]}|${barArray[3]}|\n` +
+                    `${barArray[4]}|${barArray[5]}|${barArray[6]}|${barArray[7]}:|\n` +
+                    `|:${barArray[8]}|${barArray[9]}|${barArray[10]}|${barArray[11]}|\n` +
+                    `${barArray[12]}|${barArray[13]}|${barArray[14]}|${barArray[15]}:|`;
 
     return abcString
 }
