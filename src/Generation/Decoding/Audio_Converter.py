@@ -4,7 +4,7 @@ import tempfile
 
 # TODO - Determine why MIDI saves correctly, but WAVa nd MP3 do not.
 
-default = '/Users/calebg/Documents/School/Code Repository/GANs-n-reels/src/L/Songs/Redo/'
+default = '/Users/calebg/Documents/School/Code Repository/GANs-n-reels/src/L/Songs/'
 
 
 class Converter:
