@@ -14,16 +14,21 @@ async function generate(){
     const prediction = model.predict(tf.tensor(noise, [1,100])).dataSync();
     let notes = Array.from(prediction);
 
-    // scale notes
+    // scale notes using ( (note * range) + half_max_pitch )
     let scaledNotes = notes.map(scale);
 
+    // round notes to nearest integer
+    let roundedNotes = scaledNotes.map(Math.round);
+
+    //console.log('scaled', scaledNotes);
+    //console.log('rounded', roundedNotes);
+
     // convert notes to d major scale
-    let dMajorNotes = scaledNotes.map(note_to_d_major);
+    let dMajorNotes = roundedNotes.map(note_to_d_major);
+    //console.log(dMajorNotes);
 
     // convert notes to abc string
     let myString = convertToABC(dMajorNotes);
-
-    //console.log(myString);
 
     // render and play the song
     render(myString);
@@ -37,7 +42,7 @@ async function generate(){
 function render(string){
     document.getElementById("abcString").innerHTML = string;
     ABCJS.renderAbc('notation', string);
-    ABCJS.renderMidi( "player", string, { program: 73, generateDownload: true, });
+    ABCJS.renderMidi( "player", string, { qpm: 115, program: 21, generateDownload: true, hideFinishedMeasures: false});
 
 }
 
@@ -47,8 +52,13 @@ function render(string){
  * @returns {number} the scaled value in range of 57 to 80
  */
 function scale(note){
-    return 0.5 * (80 - 57) * (note+1) + 57;
+    let note_min = 53;
+    let note_max = 93;
+    let half_max_pitch = Math.floor((note_max + note_min) / 2);
+    let pitch_range = note_max - half_max_pitch;
+    return  (note * pitch_range) + half_max_pitch;
 }
+
 
 /**
  * This function forces a note to be in the D Major scale
@@ -57,12 +67,12 @@ function scale(note){
  */
 function note_to_d_major(note){
     const d_maj_values = [2,4,6,7,9,11,13];
-    const octave = Math.floor(note / 12);
-    const noteInScale = note % 12;
-    const noteDistances = d_maj_values.map( function(value) {
+    let octave = Math.floor(note / 12);
+    let noteInScale = note % 12;
+    let noteDistances = d_maj_values.map( function(value) {
         return Math.abs(value - noteInScale);
     });
-    const roundedNote = d_maj_values[argMin(noteDistances)];
+    let roundedNote = d_maj_values[argMin(noteDistances)];
     return roundedNote + 12*octave;
 }
 
@@ -82,17 +92,28 @@ function argMin(array) {
  */
 function convertNoteToABC(note){
     const noteToABC = {
+            54: 'F,',
+            55: 'G,',
+            57: 'A,',
+            59: 'B,',
+            61: 'C,',
             62: 'D',
             64: 'E',
-            66: 'F#',
+            66: 'F',
             67: 'G',
             69: 'A',
             71: 'B',
-            73: "c#",
-            74: "d",
-            76: "e",
-            78: "f#",
-            79: "g"
+            73: 'C',
+            74: 'd',
+            76: 'e',
+            78: 'f',
+            79: 'g',
+            81: 'a',
+            83: 'b',
+            85: 'c',
+            86: 'd\'',
+            88: 'e\'',
+            90: 'f\''
         };
     return noteToABC[note];
 };
@@ -109,10 +130,10 @@ function convertToABC(song){
 
     // split the chars to 16 notes per bar and 16 bars
     var splitBars = [];
-    while(firstPass.length) splitBars.push(firstPass.splice(0,16));
+    while(firstPass.length) splitBars.push(firstPass.splice(0,4));
 
     // go over each bar converting multiple occurrences of string to a number (i.e. eefff = e2 f3)
-    let barArray = [];
+    let newArray = [];
     for (let eachBar of splitBars){
         let temp = eachBar[0];
         let occurences = 1;
@@ -129,7 +150,7 @@ function convertToABC(song){
                         barString += temp + occurences + eachBar[x];
                     }
                     else {
-                        barString += temp + ' ' + eachBar[x];
+                        barString += temp + eachBar[x];
                     }
                 }
             }
@@ -147,9 +168,14 @@ function convertToABC(song){
                 occurences += 1;
             }
         }
-        barArray.push(barString);
+        newArray.push(barString);
     }
 
+    var barArray = [];
+    for (let i = 0; i < newArray.length; i += 4){
+        let str = newArray[i];
+        barArray.push([str.concat(newArray[i+1], newArray[i+2], newArray[i+3])])
+    }
     // add it to the abc string
     var abcString = `T: GAN Morrison Generated\n` +
                     `C: GANs n Reels\n` +
@@ -164,4 +190,17 @@ function convertToABC(song){
     return abcString
 }
 
+function download() {
+    var filename = "abc_notation.txt";
+    var element = document.createElement('a');
+    var text = document.getElementById("abcString").innerHTML;
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
 
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+}
