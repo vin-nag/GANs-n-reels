@@ -37,7 +37,7 @@ async function generate(){
 function render(string){
     document.getElementById("abcString").innerHTML = string;
     ABCJS.renderAbc('notation', string);
-    ABCJS.renderMidi( "player", string, { program: 111, generateDownload: true, });
+    ABCJS.renderMidi( "player", string, { program: 73, generateDownload: true, });
 
 }
 
@@ -82,17 +82,17 @@ function argMin(array) {
  */
 function convertNoteToABC(note){
     const noteToABC = {
-            62: 'd',
-            64: 'e',
-            66: 'f#',
-            67: 'g',
-            69: 'a',
-            71: 'b',
-            73: "c#'",
-            74: "d'",
-            76: "e'",
-            78: "f#'",
-            79: "g'"
+            62: 'D',
+            64: 'E',
+            66: 'F#',
+            67: 'G',
+            69: 'A',
+            71: 'B',
+            73: "c#",
+            74: "d",
+            76: "e",
+            78: "f#",
+            79: "g"
         };
     return noteToABC[note];
 };
@@ -151,15 +151,15 @@ function convertToABC(song){
     }
 
     // add it to the abc string
-    var abcString = `T: Insert Generated Name Here\n` +
-                    `C: GAN Morrison\n` +
+    var abcString = `T: GAN Morrison Generated\n` +
+                    `C: GANs n Reels\n` +
                     `M: 4/4\n` +
                     `L: 1/16\n` +
                     `K: Dmaj\n` +
-                    `|:${barArray[0]}|${barArray[1]}|${barArray[2]}|${barArray[3]}|\n` +
-                    `${barArray[4]}|${barArray[5]}|${barArray[6]}|${barArray[7]}:|\n` +
-                    `|:${barArray[8]}|${barArray[9]}|${barArray[10]}|${barArray[11]}|\n` +
-                    `${barArray[12]}|${barArray[13]}|${barArray[14]}|${barArray[15]}:|`;
+                    `|${barArray[0]}|${barArray[1]}|${barArray[2]}|${barArray[3]}|\n` +
+                    `|${barArray[4]}|${barArray[5]}|${barArray[6]}|${barArray[7]}|\n` +
+                    `|${barArray[8]}|${barArray[9]}|${barArray[10]}|${barArray[11]}|\n` +
+                    `${barArray[12]}|${barArray[13]}|${barArray[14]}|${barArray[15]}|`;
 
     return abcString
 }
