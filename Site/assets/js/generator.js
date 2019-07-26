@@ -184,8 +184,8 @@ function convertToABC(song){
                     `K: Dmaj\n` +
                     `|${barArray[0]}|${barArray[1]}|${barArray[2]}|${barArray[3]}|\n` +
                     `|${barArray[4]}|${barArray[5]}|${barArray[6]}|${barArray[7]}|\n` +
-                    `|${barArray[8]}|${barArray[9]}|${barArray[10]}|${barArray[11]}|\n` +
-                    `${barArray[12]}|${barArray[13]}|${barArray[14]}|${barArray[15]}|`;
+                    `|:${barArray[8]}|${barArray[9]}|${barArray[10]}|${barArray[11]}|\n` +
+                    `${barArray[12]}|${barArray[13]}|${barArray[14]}|${barArray[15]}:|`;
 
     return abcString
 }
