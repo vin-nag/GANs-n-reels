@@ -31,7 +31,7 @@ async function generate(){
     let myString = convertToABC(dMajorNotes);
 
     // render and play the song
-    render(myString);
+    renderABC('generateName','abcString','notation','player', myString);
 }
 
 /**
@@ -39,11 +39,21 @@ async function generate(){
  * @param {string} string - the string representing the abc notation of the song
  * @returns {none}
  */
-function render(string){
-    document.getElementById("abcString").innerHTML = string;
-    ABCJS.renderAbc('notation', string);
-    ABCJS.renderMidi( "player", string, { qpm: 115, program: 21, generateDownload: true, hideFinishedMeasures: false});
-
+function renderABC(nameId, elementId, notationId, playerId, string){
+    document.getElementById(nameId).innerHTML = string.split(':')[1].split('\n')[0];
+    document.getElementById(elementId).innerHTML = string;
+    ABCJS.renderAbc(notationId, string);
+    ABCJS.renderMidi(
+        playerId,
+        string,
+        {
+            qpm: 115,
+            program: 21,
+            generateDownload: true,
+            inlineControls: {
+                loopToggle: true,
+            },
+        });
 }
 
 /**
@@ -184,8 +194,8 @@ function convertToABC(song){
                     `K: Dmaj\n` +
                     `|${barArray[0]}|${barArray[1]}|${barArray[2]}|${barArray[3]}|\n` +
                     `|${barArray[4]}|${barArray[5]}|${barArray[6]}|${barArray[7]}|\n` +
-                    `|:${barArray[8]}|${barArray[9]}|${barArray[10]}|${barArray[11]}|\n` +
-                    `${barArray[12]}|${barArray[13]}|${barArray[14]}|${barArray[15]}:|`;
+                    `|${barArray[8]}|${barArray[9]}|${barArray[10]}|${barArray[11]}|\n` +
+                    `${barArray[12]}|${barArray[13]}|${barArray[14]}|${barArray[15]}|`;
 
     return abcString
 }
@@ -204,3 +214,66 @@ function download() {
 
     document.body.removeChild(element);
 }
+
+const song1 =
+    `T: Oxen Pond Road\n` +
+    `C: GANs n Reels\n` +
+    `M: 4/4\n` +
+    `L: 1/16\n` +
+    `K: Dmaj\n` +
+    `|a4a4g2f2f4|e4f2g2a2g2f2e2|d4f2b2b2a2f4|g2f2a2f2g2f2e4|\n` +
+    `|fed2e'2fggaf2efg2|a4g2f2a2g2gab2|d'2e'2d'2ababa2a4|g2f2f4f4f4|\n` +
+    `|a4b2g2g2f2f4|e4f2g2bag2f2e2|d4f2b2b2a2f4|g2f2a2f2g2f2e4|\n` +
+    `e2d2d'2g2a2f2e2g2|a4g2f2a2g2a2b2|d'2e'2d'2a2b2a2a4|g2f2f4f4f2g2|`;
+
+const song2 =
+    `T: Bitters\n` +
+    `C: GANs n Reels\n` +
+    `M: 4/4\n` +
+    `L: 1/16\n` +
+    `K: Dmaj\n` +
+    `|g4g2f2f2d2d2B2|A4d2f2a2g2f2e2|d2e2f2b2a2g2e4|e2f2a2e2g4f2e2|\n` +
+    `|BA3b2e2f2d2d2e2|gfg2fgf2b2g2a4|a2d'2b2a2g2fgg2ab|a2efef3fgf2f4|\n` +
+    `|g4g2f2f2d2d2B2|A4d2f2bag2f2e2|d2e2f2b2a2gfe4|e2f2a2e2g4f2e2|\n` +
+    `A4b2e2f2d2d2e2|gfg2g2f2b2g2a4|a2d'2b2a2g4g2b2|a2e2f4g2f2f2a2|`;
+
+const song3 =
+    `T: Long Pond Trail\n` +
+    `C: GANs n Reels\n` +
+    `M: 4/4\n` +
+    `L: 1/16\n` +
+    `K: Dmaj\n` +
+    `|b2d'2d'4b4b4|a4b4b2a2a2f2|f2a2b2d'2b2d'2a4|d'4e'2b2a4g4|\n` +
+    `|d'4e'2gad'2b2fgbd'|d'2b2a2gad'2fga2d'2|e'2d'2a4b4b4|a2fgf2e2f4fe2f|\n` +
+    `|b2d'2d'4b2a2b4|a4b4d'ba2a2f2|f2b2d'bd'2b4a4|d'4e'2b2a4g4|\n` +
+    `d'2b2e'2a2d'2b2f2d'2|d'2b2a4d'2f2a2d'2|e'2d'2b2g2b4b4|a2f2f2e2f4f2a2|`;
+
+const song4 =
+    `T: By The Bay\n` +
+    `C: GANs n Reels\n` +
+    `M: 4/4\n` +
+    `L: 1/16\n` +
+    `K: Dmaj\n` +
+    `|a4g4g2f2e4|d4f2a2d'2a2b2ag|f4a2d'2b2a2f2e2|e2f2a2e2g2f2e2d2|\n` +
+    `|d2B2d'2f2fgfgf2a2|a4a4d'2a2b4|d'4d'2abb2a2a4|g2eff2e2f4f2g2|\n` +
+    `|a4a2g2g2f2e4|d4f2a2d'2a2b2g2|f4a2d'2b2a2f2e2|e2f2a2e2g2f2e2d2|\n` +
+    `d2B2d'2f2g4f2a2|a4a4d'2a2b4|d'4d'2a2b2a2a4|g2e2f4f4f2a2|`;
+
+const song5 =
+    `T: The Breezeway Way\n` +
+    `C: GANs n Reels\n` +
+    `M: 4/4\n` +
+    `L: 1/16\n` +
+    `K: Dmaj\n` +
+    `|a4a2g2f2e2d4|B2A2d2e2f2d2d4|A2d2d2a2f2g2e2f2|g2f2b2f2g4g4|\n` +
+    `|e2d2d'2fggae2f2g2|b4a2e2g2e2f2a2|a2b2abg2ef3f2a2|a2f2f4f2e2e4|\n` +
+    `|a4a2g2f2e2d4|B2A2d2e2f2d2d4|A2d2e2a2f2g2e2f2|g2f2bafeg4gf3|\n` +
+    `e2d2d'2g2a2fef2g2|b4a2e2g2e2f2a2|a2b2a2g2e2f2f2a2|a2f2f4f2e2e2f2|`;
+
+
+
+renderABC("song1","abcString1", "notation1", "player1", song5);
+
+renderABC("song2","abcString2", "notation2", "player2", song4);
+
+renderABC("song3","abcString3", "notation3", "player3", song3);
