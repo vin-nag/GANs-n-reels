@@ -32,6 +32,10 @@ async function generate(){
 
     // render and play the song
     renderABC('generateName','abcString','notation','player', myString);
+
+    let comment = `This song composed using the random input: ` + noise;
+    document.getElementById('noise').innerHTML = comment;
+
 }
 
 /**
@@ -39,7 +43,7 @@ async function generate(){
  * @param {string} string - the string representing the abc notation of the song
  * @returns {none}
  */
-function renderABC(nameId, elementId, notationId, playerId, string){
+function renderABC(nameId, elementId, notationId, playerId, string, qpm=115, program=21){
     document.getElementById(nameId).innerHTML = string.split(':')[1].split('\n')[0];
     document.getElementById(elementId).innerHTML = string;
     ABCJS.renderAbc(notationId, string);
@@ -47,8 +51,8 @@ function renderABC(nameId, elementId, notationId, playerId, string){
         playerId,
         string,
         {
-            qpm: 115,
-            program: 21,
+            qpm: qpm,
+            program: program,
             generateDownload: true,
             inlineControls: {
                 loopToggle: true,
@@ -143,6 +147,7 @@ function convertToABC(song){
     while(firstPass.length) splitBars.push(firstPass.splice(0,4));
 
     // go over each bar converting multiple occurrences of string to a number (i.e. eefff = e2 f3)
+    //let barArray = [];
     let newArray = [];
     for (let eachBar of splitBars){
         let temp = eachBar[0];
@@ -179,15 +184,17 @@ function convertToABC(song){
             }
         }
         newArray.push(barString);
+        //barArray.push(barString)
     }
 
-    var barArray = [];
-    for (let i = 0; i < newArray.length; i += 4){
+    let barArray = [];
+    for (let i = 0; i < newArray.length; i += 4) {
         let str = newArray[i];
-        barArray.push([str.concat(newArray[i+1], newArray[i+2], newArray[i+3])])
+        barArray.push([str.concat(newArray[i + 1], newArray[i + 2], newArray[i + 3])])
     }
+
     // add it to the abc string
-    var abcString = `T: GAN Morrison Generated\n` +
+    let abcString = `T: GAN Morrison Generated\n` +
                     `C: GANs n Reels\n` +
                     `M: 4/4\n` +
                     `L: 1/16\n` +
@@ -195,16 +202,19 @@ function convertToABC(song){
                     `|${barArray[0]}|${barArray[1]}|${barArray[2]}|${barArray[3]}|\n` +
                     `|${barArray[4]}|${barArray[5]}|${barArray[6]}|${barArray[7]}|\n` +
                     `|${barArray[8]}|${barArray[9]}|${barArray[10]}|${barArray[11]}|\n` +
-                    `${barArray[12]}|${barArray[13]}|${barArray[14]}|${barArray[15]}|`;
+                    `|${barArray[12]}|${barArray[13]}|${barArray[14]}|${barArray[15]}|`;
 
     return abcString
 }
 
 function download() {
-    var filename = "abc_notation.txt";
-    var element = document.createElement('a');
-    var text = document.getElementById("abcString").innerHTML;
-    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    let filename = "abc_notation.txt";
+    let element = document.createElement('a');
+    let text = document.getElementById("abcString").innerHTML;
+    let header = document.getElementById('noise').innerHTML;
+
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text)
+        + '\n\n' + encodeURIComponent(header));
     element.setAttribute('download', filename);
 
     element.style.display = 'none';
@@ -216,34 +226,34 @@ function download() {
 }
 
 const song1 =
-    `T: Oxen Pond Road\n` +
+    `T: Freshwater Moose\n` +
     `C: GANs n Reels\n` +
     `M: 4/4\n` +
     `L: 1/16\n` +
     `K: Dmaj\n` +
-    `|a4a4g2f2f4|e4f2g2a2g2f2e2|d4f2b2b2a2f4|g2f2a2f2g2f2e4|\n` +
-    `|fed2e'2fggaf2efg2|a4g2f2a2g2gab2|d'2e'2d'2ababa2a4|g2f2f4f4f4|\n` +
-    `|a4b2g2g2f2f4|e4f2g2bag2f2e2|d4f2b2b2a2f4|g2f2a2f2g2f2e4|\n` +
-    `e2d2d'2g2a2f2e2g2|a4g2f2a2g2a2b2|d'2e'2d'2a2b2a2a4|g2f2f4f4f2g2|`;
+    `|f2e2e2fee2d2d4|ed3aga2a4fgf2|d2e2d4d3Be4|f2e2e2d2d4d4|\n` +
+    `|fefee2fee2d2ed3|ededgfa2a4g2f2|e4d4d2Bde4|f2e2e2d2d4d4|\n` +
+    `|e4e4fg3f4|a4a2g2e2d2d4|e4e4f2e2ef2g|a2f2efd2d4d4|\n` +
+    `|e4e3fg4f4|a4b2a2e2d2d4|e4e3dd2e2e2f2|gfe2f2d2d4d4|`;
 
 const song2 =
-    `T: Bitters\n` +
+    `T: The Breezeway Way\n` +
     `C: GANs n Reels\n` +
     `M: 4/4\n` +
     `L: 1/16\n` +
     `K: Dmaj\n` +
     `|g4g2f2f2d2d2B2|A4d2f2a2g2f2e2|d2e2f2b2a2g2e4|e2f2a2e2g4f2e2|\n` +
-    `|BA3b2e2f2d2d2e2|gfg2fgf2b2g2a4|a2d'2b2a2g2fgg2ab|a2efef3fgf2f4|\n` +
-    `|g4g2f2f2d2d2B2|A4d2f2bag2f2e2|d2e2f2b2a2gfe4|e2f2a2e2g4f2e2|\n` +
-    `A4b2e2f2d2d2e2|gfg2g2f2b2g2a4|a2d'2b2a2g4g2b2|a2e2f4g2f2f2a2|`;
+    `|f2gff3eed3dBd2|f2e2gfa2a2baa2g2|f4e2d2e2d2ef3|a2f2e2d2d4d4|\n` +
+    `|e4e4g2a2g2f2|a2b2b2g2ed2ed4|e4e2f2b2f2babd'|d'2abf2ded4d4|\n` +
+    `|fe3e3fg4f4|a2b2b2a2e2d2ed3|fef2fg3degafgf2|e4e4d4d4|`;
 
 const song3 =
-    `T: Long Pond Trail\n` +
+    `T: Pippy Park Puffin\n` +
     `C: GANs n Reels\n` +
     `M: 4/4\n` +
     `L: 1/16\n` +
     `K: Dmaj\n` +
-    `|b2d'2d'4b4b4|a4b4b2a2a2f2|f2a2b2d'2b2d'2a4|d'4e'2b2a4g4|\n` +
+    `|gfg2f4e2d2d4|f2e2g2a2a4gafg|e2f2e2d2d4e3f|a2f2e2d2dBd2d4|\n` +
     `|d'4e'2gad'2b2fgbd'|d'2b2a2gad'2fga2d'2|e'2d'2a4b4b4|a2fgf2e2f4fe2f|\n` +
     `|b2d'2d'4b2a2b4|a4b4d'ba2a2f2|f2b2d'bd'2b4a4|d'4e'2b2a4g4|\n` +
     `d'2b2e'2a2d'2b2f2d'2|d'2b2a4d'2f2a2d'2|e'2d'2b2g2b4b4|a2f2f2e2f4f2a2|`;
@@ -254,10 +264,10 @@ const song4 =
     `M: 4/4\n` +
     `L: 1/16\n` +
     `K: Dmaj\n` +
-    `|a4g4g2f2e4|d4f2a2d'2a2b2ag|f4a2d'2b2a2f2e2|e2f2a2e2g2f2e2d2|\n` +
-    `|d2B2d'2f2fgfgf2a2|a4a4d'2a2b4|d'4d'2abb2a2a4|g2eff2e2f4f2g2|\n` +
-    `|a4a2g2g2f2e4|d4f2a2d'2a2b2g2|f4a2d'2b2a2f2e2|e2f2a2e2g2f2e2d2|\n` +
-    `d2B2d'2f2g4f2a2|a4a4d'2a2b4|d'4d'2a2b2a2a4|g2e2f4f4f2a2|`;
+    `|gf3f4d4d4|e3fa2b2d'4b4|gafgefe2ef3a2g2|a2f2e2d2dBd2d4|\n` +
+    `|f2gff3ed4d2ed|fe3a2d'2d'4b4|a2g2efe2f3ga4|a2fge2d2d4d4|\n` +
+    `|e2d2d4f2g2e3f|a2b2a2f2d4d4|f4fef2bd'f2a2bd'|d'2b2g2ded4d4|\n` +
+    `|e2d2d2e2g2e2d2fe|a2baa2f2d4e3d|gfaga4e2a2a2g2|efe2e4d4d4|`;
 
 const song5 =
     `T: The Breezeway Way\n` +
@@ -265,15 +275,14 @@ const song5 =
     `M: 4/4\n` +
     `L: 1/16\n` +
     `K: Dmaj\n` +
-    `|a4a2g2f2e2d4|B2A2d2e2f2d2d4|A2d2d2a2f2g2e2f2|g2f2b2f2g4g4|\n` +
-    `|e2d2d'2fggae2f2g2|b4a2e2g2e2f2a2|a2b2abg2ef3f2a2|a2f2f4f2e2e4|\n` +
-    `|a4a2g2f2e2d4|B2A2d2e2f2d2d4|A2d2e2a2f2g2e2f2|g2f2bafeg4gf3|\n` +
-    `e2d2d'2g2a2fef2g2|b4a2e2g2e2f2a2|a2b2a2g2e2f2f2a2|a2f2f4f2e2e2f2|`;
+    `|f4e4e2d2d4|e4gf3a3gg2e2|d2edd4d2BAd4|f2e2e2d2d4d4|\n` +
+    `|fef2e4ed2Bd2ed|e4f2g2a4g2e2|d2e2d4d2A2d2e2|f3ee2d2d4d4|\n` +
+    `|e4e4fg3f4|a2b2b2age4e2d2|e4e3fa2e2fg2a|abf2f2ded4d4|\n` +
+    `|e4e3fg3af4|a2b2b2a2f2e2e4|e4e4d2e2e2fe|f4f2d2d4d4|\n`;
 
 
+renderABC("song1","abcString1", "notation1", "player1", song1);
 
-renderABC("song1","abcString1", "notation1", "player1", song5);
-
-renderABC("song2","abcString2", "notation2", "player2", song4);
+renderABC("song2","abcString2", "notation2", "player2", song2);
 
 renderABC("song3","abcString3", "notation3", "player3", song3);

@@ -13,6 +13,13 @@
 			.abcjs-inline-midi {
 				max-width: 800px;
 			}
+			div.divAbcTuneGraphCanvas {
+			 width: 300px;
+			 height: 300px;
+			}
+			div.divAbcTuneGraphScore {
+			 width: 300px;
+			}
 		</style>
 		</head>
 	<body class="">
@@ -218,7 +225,7 @@
                             <p>These songs were generated on a GAN trained on 4000 epochs.</p>
 
 							<div class="image align-left">
-								<i><h3 id="song1"></h3></i>
+								<h3 id="song1"></h3>
 								<pre style="text-align: justify;" id="abcString1"></pre>
 								<p id="notation1"></p>
 								<p id="player1"></p>
@@ -226,7 +233,7 @@
 							<hr>
 
 							<div class="image align-left">
-								<i><h3 id="song2"></h3></i>
+								<h3 id="song2"></h3>
 								<pre style="text-align: justify;" id="abcString2"></pre>
 								<p id="notation2"></p>
 								<p id="player2"></p>
@@ -234,7 +241,7 @@
 							<hr>
 
 							<div class="image align-left">
-								<i><h3 id="song3"></h3></i>
+								<h3 id="song3"></h3>
 								<pre style="text-align: justify;" id="abcString3"></pre>
 								<p id="notation3"></p>
 								<p id="player3"></p>
@@ -246,10 +253,11 @@
 				<!-- Generate -->
 					<section id="generate" class="wrapper style3 fullscreen fade-up">
 						<div class = "inner">
-							<i><h3 id="generateName"></h3></i>
+							<h3 id="generateName"></h3>
 							<pre style="text-align: justify;" id="abcString"></pre>
 							<p id="notation"></p>
 							<p id="player"></p>
+							<p hidden id="noise"></p>
 							<button onclick="generate('abcString','notation','player')">Generate Your Own</button>
 							<button onclick="download()">Download generated abc notation text file</button>
 
@@ -354,6 +362,7 @@
 					</section>
 
 			</div>
+								<div id="tuneGraphDiagnostics"></div>
 
 		<!-- Footer -->
 			<footer id="footer" class="wrapper style1-alt">
@@ -373,5 +382,5 @@
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
 			<script src="assets/js/generator.js"></script>
-	
+
 </body></html>
