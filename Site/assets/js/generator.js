@@ -43,7 +43,7 @@ async function generate(){
  * @param {string} string - the string representing the abc notation of the song
  * @returns {none}
  */
-function renderABC(nameId, elementId, notationId, playerId, string, qpm=115, program=21){
+function renderABC(nameId, elementId, notationId, playerId, string, qpm=120, program=24){
     document.getElementById(nameId).innerHTML = string.split(':')[1].split('\n')[0];
     document.getElementById(elementId).innerHTML = string;
     ABCJS.renderAbc(notationId, string);
@@ -242,10 +242,10 @@ const song2 =
     `M: 4/4\n` +
     `L: 1/16\n` +
     `K: Dmaj\n` +
-    `|g4g2f2f2d2d2B2|A4d2f2a2g2f2e2|d2e2f2b2a2g2e4|e2f2a2e2g4f2e2|\n` +
-    `|f2gff3eed3dBd2|f2e2gfa2a2baa2g2|f4e2d2e2d2ef3|a2f2e2d2d4d4|\n` +
-    `|e4e4g2a2g2f2|a2b2b2g2ed2ed4|e4e2f2b2f2babd'|d'2abf2ded4d4|\n` +
-    `|fe3e3fg4f4|a2b2b2a2e2d2ed3|fef2fg3degafgf2|e4e4d4d4|`;
+    `|e4e4efB2d4|f2e2f2e2gf3f2d2|B2d2d4d2A2d3B|fe3e2d2d4d4|\n` +
+    `|e2fee2fee2dBd4|fefef3egf3f2d2|B2d2d4d2A2d4|fe3e2d2d2eded3|\n` +
+    `|e2f2f4a4a2g2|ab3b2a2f2e2e2d2|e4e3fa2f2g2fg|a2f2f2e2d4ded2|\n` +
+    `|f4f4a3ba2g2|b4b2a2g2f2f2e2|d3ee2dede3fefe|g2f2f2e2d2e2d4|`;
 
 const song3 =
     `T: Pippy Park Puffin\n` +
@@ -253,10 +253,10 @@ const song3 =
     `M: 4/4\n` +
     `L: 1/16\n` +
     `K: Dmaj\n` +
-    `|gfg2f4e2d2d4|f2e2g2a2a4gafg|e2f2e2d2d4e3f|a2f2e2d2dBd2d4|\n` +
-    `|d'4e'2gad'2b2fgbd'|d'2b2a2gad'2fga2d'2|e'2d'2a4b4b4|a2fgf2e2f4fe2f|\n` +
-    `|b2d'2d'4b2a2b4|a4b4d'ba2a2f2|f2b2d'bd'2b4a4|d'4e'2b2a4g4|\n` +
-    `d'2b2e'2a2d'2b2f2d'2|d'2b2a4d'2f2a2d'2|e'2d'2b2g2b4b4|a2f2f2e2f4f2a2|`;
+    `|e4e2fef2d2e2d2|e2d2f4a2f2f2e2|d4d4d2BAd4|e4e2d2d4d4|\n` +
+    `|e4e2fefed2ed3|ededfef2a2gff2e2|dBd2d3Bd2B2dBed|fe3e2d2d4d4|\n` +
+    `|e4f4a4a4|a4b2a2f2e2e2d2|e4e4g2e2f4|gaf2f2d2d4d4|\n` +
+    `|e4f4a4a4|a3bb2a2f2e2e4|d4e3de2f2e2f2|a2fef2e2d4d4|`;
 
 const song4 =
     `T: By The Bay\n` +
@@ -264,25 +264,25 @@ const song4 =
     `M: 4/4\n` +
     `L: 1/16\n` +
     `K: Dmaj\n` +
-    `|gf3f4d4d4|e3fa2b2d'4b4|gafgefe2ef3a2g2|a2f2e2d2dBd2d4|\n` +
-    `|f2gff3ed4d2ed|fe3a2d'2d'4b4|a2g2efe2f3ga4|a2fge2d2d4d4|\n` +
-    `|e2d2d4f2g2e3f|a2b2a2f2d4d4|f4fef2bd'f2a2bd'|d'2b2g2ded4d4|\n` +
-    `|e2d2d2e2g2e2d2fe|a2baa2f2d4e3d|gfaga4e2a2a2g2|efe2e4d4d4|`;
+    `|f4e2f2f2d2d4|e4f3eg2f2f2d2|d2e2d4d2B2d4|f2e2e2d2d4d4|\n` +
+    `|fefefefefed2d4|e4fef2g2f2f2d2|d2e2d4d2B2d4|f2e2e2d2d4d4|\n` +
+    `|e2f2f4a4a2g2|a4b2a2f2e2e2d2|e2d2d2e2g2e2f2ga|abf2f2d2d4d4|\n` +
+    `|f2eff4a4gag2|a3bb2a2f2e2e2d2|d2e2e3de2f2e2f2|f2e2f2d2d4d4|`;
 
 const song5 =
-    `T: The Breezeway Way\n` +
+    `T: Pippy Place Puffin\n` +
     `C: GANs n Reels\n` +
     `M: 4/4\n` +
     `L: 1/16\n` +
     `K: Dmaj\n` +
-    `|f4e4e2d2d4|e4gf3a3gg2e2|d2edd4d2BAd4|f2e2e2d2d4d4|\n` +
-    `|fef2e4ed2Bd2ed|e4f2g2a4g2e2|d2e2d4d2A2d2e2|f3ee2d2d4d4|\n` +
-    `|e4e4fg3f4|a2b2b2age4e2d2|e4e3fa2e2fg2a|abf2f2ded4d4|\n` +
-    `|e4e3fg3af4|a2b2b2a2f2e2e4|e4e4d2e2e2fe|f4f2d2d4d4|\n`;
+    `|g4f4e2d2e2de|f4a2b2b3d'a3b|g4f2e2f4a2g2|a2f2e2d2dBd2d4|\n` +
+    `|gfg2f4e2d2eded|f4a2b2b2d'bb2a2|a2gaefeff3ga4|abfgefd2d4d4|\n` +
+    `|e2d2d4f2g2e3f|a4a2f2d4d4|f4fef2b2f2a2d'2|d'2bd'gaded4d4|\n` +
+    `|fed2ede2g2e2e2fe|a4a2f2d4eded|f2agg2bae2a2a2g2|e4e4d4d4|\n`;
 
 
-renderABC("song1","abcString1", "notation1", "player1", song1);
+renderABC("song1","abcString1", "notation1", "player1", song4);
 
 renderABC("song2","abcString2", "notation2", "player2", song2);
 
-renderABC("song3","abcString3", "notation3", "player3", song3);
+renderABC("song3","abcString3", "notation3", "player3", song5);
