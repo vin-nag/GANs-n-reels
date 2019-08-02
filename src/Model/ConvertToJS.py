@@ -2,8 +2,11 @@ import tensorflowjs as tfjs
 import tensorflow as tf
 import numpy as np
 
-model = tf.keras.models.load_model('./Trained/generator_jurassic.h5')
-tfjs.converters.save_keras_model(model, './Trained')
+gen_model = tf.keras.models.load_model('./Trained/generator_better.h5')
+#dis_model = tf.keras.models.load_model('./Trained/discriminator.h5')
+
+tfjs.converters.save_keras_model(gen_model, './Trained')
+#tfjs.converters.save_keras_model(dis_model, './Trained')
 print('done')
 
 #noise = np.random.normal(0, 1, [1, 100]) #20 arrays of noise of shape [100,]
