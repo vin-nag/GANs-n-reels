@@ -77,6 +77,14 @@ def raw_abc_to_npy_file(update=False):
     print('Creating dataframe...')
     tunes = pd.DataFrame.from_dict(tunes_raw, orient='index')
     tunes['abc_raw'] = tunes.abc # preserve the original abc strings
+    tunes = tunes[tunes['abc_raw'].str.count('|') != 17]
+
+    tunesList = list(tunes['abc_raw'])
+
+    with open('./abcTunes.txt', 'w') as f:
+        for item in tunesList:
+            f.write("%s\n" % item)
+
     tunes = Vectorizer.vectorize_frame(tunes, pad_bars=True, bar_subdivision=BAR_SUBDIVISION)
 
     print("Size of Initial Frame: {}".format(len(tunes.index)))
