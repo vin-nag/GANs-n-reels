@@ -5,6 +5,7 @@ import textdistance
 import random
 import seaborn as sns
 import matplotlib.pyplot as plt
+from scipy.stats import norm
 
 
 def clean(tune):
@@ -84,12 +85,15 @@ def print_stats(arr, title):
 
 def plot(arr, title):
     sns.set(style="whitegrid")
-    sns.distplot(arr)
+    #sns.distplot(arr, norm_hist=False, kde=False)
     #plt.title(title)
-    #sns.boxplot(arr)
-    plt.title('damerau-levenshtein distance of ' + title)
+    sns.boxplot(arr)
+    #plt.ylabel('count')
+    plt.xlabel('normalized distance')
+    text = ' (mean = ' + str(round( np.mean(arr), 4)) + ', variance = ' + str(round( np.var(arr), 4)) + ')'
+    plt.title(title + text)
+    plt.savefig(title+'box_plots.png')
     plt.show()
-    plt.savefig(title+'dist_plots.png')
 
 
 """
@@ -162,7 +166,6 @@ for tune in tunes:
 
 get_stats(songs, 'generated')
 """
-
 
 dataset = np.load('dataset.npy')
 generated = np.load('generated.npy')

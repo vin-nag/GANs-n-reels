@@ -44,6 +44,7 @@ async function generate(){
  * @returns {none}
  */
 function renderABC(nameId, elementId, notationId, playerId, string, qpm=120, program=24){
+    console.log(string)
     document.getElementById(nameId).innerHTML = string.split(':')[1].split('\n')[0];
     document.getElementById(elementId).innerHTML = string;
     ABCJS.renderAbc(notationId, string);
@@ -153,9 +154,10 @@ function convertToABC(song){
         let temp = eachBar[0];
         let occurences = 1;
         let barString = "";
+        let count = 1;
 
         for (let x = 1; x < eachBar.length; x++){
-            if (x === eachBar.length - 1){
+             if (x === eachBar.length - 1){
                 if (temp === eachBar[x]){
                     occurences += 1;
                     barString += temp + occurences;
@@ -190,7 +192,7 @@ function convertToABC(song){
     let barArray = [];
     for (let i = 0; i < newArray.length; i += 4) {
         let str = newArray[i];
-        barArray.push([str.concat(newArray[i + 1], newArray[i + 2], newArray[i + 3])])
+        barArray.push([str.concat(" ", newArray[i+1], " ", newArray[i+2], " ", newArray[i+3])])
     }
 
     // add it to the abc string
