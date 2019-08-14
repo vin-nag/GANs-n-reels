@@ -131,7 +131,7 @@ function convertNoteToABC(note){
             90: 'f\''
         };
     return noteToABC[note];
-};
+}
 
 /**
  * This function converts a sequence of midi notes to the corresponding abc string
@@ -209,6 +209,11 @@ function convertToABC(song){
     return abcString
 }
 
+/**
+ * This function allows one to download the abc string of a song as a .txt file
+ * @params {none}
+ * @returns {none}
+ */
 function download() {
     let filename = "abc_notation.txt";
     let element = document.createElement('a');
