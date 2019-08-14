@@ -43,7 +43,7 @@ async function generate(){
  * @param {string} string - the string representing the abc notation of the song
  * @returns {none}
  */
-function renderABC(nameId, elementId, notationId, playerId, string, qpm=120, program=24){
+function renderABC(nameId, elementId, notationId, playerId, string, qpm=120, program=1){
     console.log(string)
     document.getElementById(nameId).innerHTML = string.split(':')[1].split('\n')[0];
     document.getElementById(elementId).innerHTML = string;
@@ -111,21 +111,21 @@ function convertNoteToABC(note){
             55: 'G,',
             57: 'A,',
             59: 'B,',
-            61: 'C,',
+            61: 'C',
             62: 'D',
             64: 'E',
             66: 'F',
             67: 'G',
             69: 'A',
             71: 'B',
-            73: 'C',
+            73: 'c',
             74: 'd',
             76: 'e',
             78: 'f',
             79: 'g',
             81: 'a',
             83: 'b',
-            85: 'c',
+            85: 'c\'',
             86: 'd\'',
             88: 'e\'',
             90: 'f\''
