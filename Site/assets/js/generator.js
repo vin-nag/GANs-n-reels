@@ -32,10 +32,24 @@ async function generate(){
 
     // render and play the song
     renderABC('generateName','abcString','notation','player', myString);
+    renderImage('canvasId', dMajorNotes);
 
     let comment = `This song composed using the random input: ` + noise;
     document.getElementById('noise').innerHTML = comment;
 
+}
+
+function renderImage(canvasId, array) {
+    let canvas = document.getElementById(canvasId);
+    let ctx = canvas.getContext('2d');
+    let id = ctx.createImageData(64,4); // only do this once per page
+    var d  = id.data;                        // only do this once per page
+    console.log('generating', d);
+    d[0]   = 100;
+    d[1]   = 150    ;
+    d[2]   = 250;
+    d[3]   = 0;
+    ctx.putImageData(id, 0, 0 );
 }
 
 /**
@@ -44,7 +58,7 @@ async function generate(){
  * @returns {none}
  */
 function renderABC(nameId, elementId, notationId, playerId, string, qpm=120, program=1){
-    console.log(string)
+    // console.log(string)
     document.getElementById(nameId).innerHTML = string.split(':')[1].split('\n')[0];
     document.getElementById(elementId).innerHTML = string;
     ABCJS.renderAbc(notationId, string);
@@ -287,8 +301,18 @@ const song5 =
     `|e2d2d4f2g2e3f|a4a2f2d4d4|f4fef2b2f2a2d'2|d'2bd'gaded4d4|\n` +
     `|fed2ede2g2e2e2fe|a4a2f2d4eded|f2agg2bae2a2a2g2|e4e4d4d4|\n`;
 
+const song6 =
+    `T: Moustafa's Fav Song\n` +
+    `C: GANs n Reels\n` +
+    `M: 4/4\n` +
+    `L: 1/16\n` +
+    `K: Dmaj\n` +
+    `|G2FG F2EF D2E2 E2F2|DEG2 G2A2 d2GA d4|d2A2 B2G2 E2F2 A2d2|d4 f2d2 e2f2 f2d2|\n` +
+    `|G2F2F2EFD2EDE2F2|DEGFG2A2dBG2D4|d2A2B2G2E2F2A2d2|d4f2d2e2dB ABde|\n` +
+    `|f2d2d2e2g2e2gf2e|a2edg2a2a2e2e4|g3fe2feg2d2d4|age2F2B2d4B2e2|\n` +
+    `|f2d2d2e2g2e2gfe2|a2e2gfa2a2e2e4|f2d'bd'2g2ag3f2e2|d4d2A2d2f2d2A2|\n`;
 
-renderABC("song1","abcString1", "notation1", "player1", song4);
+renderABC("song1","abcString1", "notation1", "player1", song6);
 
 renderABC("song2","abcString2", "notation2", "player2", song2);
 
