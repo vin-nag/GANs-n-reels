@@ -134,12 +134,10 @@
 							<h2>Generative Adversarial Network</h2>
 							<div class="image align-center fit">
 								<figure>
-									<img src="images/gan.png" alt="Generative Adversarial Network Process"/>
-									<figcaption> visualizing a generative adversarial network </figcaption>
+									<img src="images/gan.jpg" alt="Generative Adversarial Network Process"/>
+									<figcaption>High level overview of a GAN model. Source: <a href="https://www.slideshare.net/xavigiro/deep-learning-for-computer-vision-generative-models-and-adversarial-training-upc-2016" target="_blank">Kevin McGuinness</a></figcaption>
 								</figure>
-
 							</div>
-
 							 <p> An Artificial Neural Network, or ANN, is based on a collection of connected units called nodes, which
 								can be loosely compared to neurons in the human brain. There are various types of ANNs, many of which have been successfully used to classify,
 								predict, and generate different types of data.
@@ -153,6 +151,40 @@
 								The GAN has been structured to take advantage of the features that have been observed in the image forms of the Irish tunes in the training dataset.
 								We opted for a Deconvolutional GAN since they are renowned for performing well on images, and making training a lot more stable.
 							</p>
+
+							<div class="image align-center fit">
+								<figure>
+									<img src="images/generator.png" alt="Generator Architecture"/>
+									<figcaption>Architecture of our Generator</figcaption>
+								</figure>
+								<hr>
+								<figure>
+									<img src="images/discriminator.png" alt="Discriminator Architecture"/>
+									<figcaption>Architecture of our Discriminator</figcaption>
+								</figure>
+							</div>
+							<p>
+								The discriminator is a 6-tower convolution network. We chose to use dilated filters
+								on 5 of the towers to capture relative information between bars and phrases, with the
+								remaining layer being an undilated 4x4 convolution. A 4x2 filter with a 16x2 dilation
+								captures the $n^{th}$ note of each bar at the first and third or second and fourth
+								phrases, for example. This helps the model learn the structure of music - there are
+								thematic patterns and repetitions at the song level as well as within phrases and
+								within bars. Having multiple towers each learning different aspects gives us a
+								versatility and helps avoid the "tunnel vision" nature of other generative music models.
+							</p>
+
+							<div class="image align-center fit">
+								<figure>
+									<img src="images/4x2%20-%208x2.png" alt="Tower"/>
+									<img src="images/4x2%20-%2016x2.png" alt="Tower"/>
+									<img src="images/4x4%20-%201x1.png" alt="Tower"/>
+									<img src="images/4x4%20-%204x1.png" alt="Tower"/>
+									<img src="images/4x4%20-%208x1.png" alt="Tower"/>
+									<img src="images/4x4%20-%2016x1.png" alt="Tower"/>
+									<figcaption>Visualizations of the various towers used for dilation.</figcaption>
+								</figure>
+							</div>
 
 							<ul class="actions">
 								<li><a href="#approach" class="button scrolly">Our Approach</a></li>
@@ -174,16 +206,8 @@
 
 							<p>We hope to use the distinctive structure of Irish tunes to make them suitable for GAN-based music generation. Our main idea is to regard an Irish melody as a fixed-size object with cross-references among its parts: “music as a picture” view. The two key components of this project are: </p>
 								<ol>
-								<li>Preprocessing:</li>
-								<ul>
-									<li>Creating a well-defined format for music encoding suitable for GANs</li>
-									<li>Representing “vertical” dependencies in the tunes</li>
-								</ul>
-								<li>Modifying GANs for improved performance via:</li>
-								<ul>
-									<li>Statistical “Bagging” and “Boosting” to mimic the full input distribution</li>
-									<li>Modifying training rate to avoid “Mode Collapse”</li>
-								</ul>
+								<li>Encoding temporal information using spatial data.</li>
+								<li>Leveraging knowledge of Irish music to design the model.</li>
 							</ol>
 							<ul class="actions">
 								<li><a href="#results" class="button scrolly">Results</a></li>
@@ -195,18 +219,20 @@
 					<section id="results" class="wrapper style3 fullscreen fade-up">
 						<div class="inner">
 							<h2>Results</h2>
-							<p>Check back here for more findings soon. Here are some images generated while coming up with our Music as a Picture view. Our code and interesting findings and results will be uploaded here as well as to an online repository for public access
+							<p>Evaluating the performance of our model is hard since music is subjective. Nevertheless,
+								here are some results. Our code and interesting findings and results will be uploaded
+								here as well as to an online repository for public access
         					<a href="https://github.com/vin-nag/GANs-n-reels" target="_blank">here.</a></p>
 							<div class="image align-center fit">
 								<figure>
-									<img src="images/vectorized%20image.png" alt="Vectorized Images"/>
-									<figcaption>visualizing music as a structured picture</figcaption>
+									<img src="images/mean_absolute_deviation.png" alt="Mean Absolute Deviation"/>
+									<figcaption>Mean absolute deviation for the dataset and the generated distributions</figcaption>
 								</figure>
+								<hr>
 								<figure>
-									<img src="images/song%20type.png" alt="Song Types"/>
-									<figcaption>song types from our dataset</figcaption>
+									<img src="images/gan_loss.png" alt="Gan loss"/>
+									<figcaption>GAN loss function and an image from dataset and generated distributions.</figcaption>
 								</figure>
-
 							</div>
 
                             <ul class="actions">
@@ -222,7 +248,7 @@
 
                             <h2>GAN Generated Music</h2>
 
-                            <p>These songs were generated on a GAN trained on 4000 epochs.</p>
+                            <p>These songs were generated using our model. You can generate your own unique songs below, using tensorflow js. </p>
 
 							<div class="image align-left">
 								<h3 id="song1"></h3>
@@ -334,12 +360,12 @@
 							</section>
 
 							<section>
-								<a href="#" class="image"><img src="images/vineel.jpg" alt="Vineel Nagisetty" data-position="center center" /></a>
+								<a href="#" class="image"><img src="images/vineel.JPG" alt="Vineel Nagisetty" data-position="center center" /></a>
 								<div class="content">
 									<div class="inner">
 										<h2>Vineel Nagisetty</h2>
-										<p>Vineel is currently pursuing an MASc in the University of Waterloo and previously completed
-											his Computer Science degree at Memorial University of Newfoundland. </p>
+										<p>Vineel has completed his Computer Science degree at Memorial University of
+											Newfoundland and will be pursuing a Masters at University of Waterloo in Fall 2019. </p>
 										<ul class="actions">
 											<li><a href="https://github.com/vin-nag" target="_blank" class="button">More information</a></li>
 										</ul>
