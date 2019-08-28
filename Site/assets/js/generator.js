@@ -269,6 +269,6 @@ const song2 =
 
 renderABC("song1","abcString1", "notation1", "player1", song1);
 
-renderABC("song2","abcString2", "notation2", "player2", song2);
+renderABC("song2","abcString2", "notation2", "player2", song3);
 
-renderABC("song3","abcString3", "notation3", "player3", song3);
+//renderABC("song3","abcString3", "notation3", "player3", song3);
