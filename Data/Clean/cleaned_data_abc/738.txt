@@ -1,0 +1,6 @@
+X:738
+T: Cleaned
+M:4/4
+C: The Sessions
+K: DMaj
+e2A2A4e2A2f2A2|e2A2A4e2A2g2e2|f2d2d4f2d2a2d2|f2a2a2b2a4g2f2||e2A2A4e2A2f2A2|e2A2A4e2A2g2e2|f2d2d4f2d2a2d2|f2a2a2b2a4g2e2||d2b2b2a2g2f2e2d2|g2b2b2a2g4g2a2|b4b2a2b2B#'2d'2b2|a2f2d2f2a4g2e2||d2b2b2a2g2f2e2d2|g2b2b2a2g4g2a2|b4b2a2b2B#'2d'2b2|a2f2d2f2a4g2f2
